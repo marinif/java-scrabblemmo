@@ -17,10 +17,26 @@ public class Griglia {
 				
 			}
 		}
+		//PRIMA RIGA
 		caselle[0][3].setCasella("BIANCO");
 		caselle[0][11].setCasella("BIANCO");
+		//SECONDA RIGA
 		caselle[1][5].setCasella("BLU");
 		caselle[1][9].setCasella("BLU");
 		caselle[1][13].setCasella("GIALLO");
+		//TERZA RIGA
+		caselle[2][6].setCasella("BIANCO");
+		caselle[2][8].setCasella("BIANCO");
+		caselle[2][12].setCasella("GIALLO");
+		//QUARTA RIGA
+		caselle[3][0].setCasella("BIANCO");
+		caselle[3][7].setCasella("BIANCO");
+		caselle[3][11].setCasella("GIALLO");
+		caselle[3][14].setCasella("BIANCO");
+		//QUINTA RIGA
+		
+		
+		
+		
 	}
 }
