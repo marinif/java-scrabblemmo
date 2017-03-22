@@ -27,18 +27,19 @@ public class Scrabble {
 				// BLU
 				else if(((y==5 || y==9) && ((x-1)%4 == 0)) ||((x==5 || x==9) && ((y-1)%4 == 0)))
 					coloriCaselle[x][y] = Colore.BLU;
+				//BIANCO
+				else if(((x==14 || x==0) && (y==3 || y==11)) || ((y==14 || y==0) && (x==3 || x==11)) || ((x==6 || x==8) &&(y==6 || y==8)))
+					coloriCaselle[x][y] = Colore.BIANCO;
 				// ROSA
 				else if((x == y) || (y == 14 - x))
 					coloriCaselle[x][y] = Colore.ROSA;
-				//BIANCO
-				// TODO: placeholder, da inserire posizioni prefissate
-				else if(false)
-					coloriCaselle[x][y] = Colore.BIANCO;
 				// VERDE
 				else
 					coloriCaselle[x][y] = Colore.VERDE;
 			}
 		}
+		
+		
 		
 		// Inizializza i tasselli nel sacco nelle quantita' permesse dal regolamento
 		// TODO: impostare la quantita' corretta
