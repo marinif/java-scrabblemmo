@@ -4,6 +4,7 @@ import java.net.URL;
 import java.util.ResourceBundle;
 
 import game.Tassello;
+import game.client.elements.PiecePane;
 import game.Scrabble;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -25,6 +26,9 @@ public class GameController implements Initializable {
 		// Imposta la griglia
 		game = new Scrabble();
 		game.setGriglia(gameBoard);
+		
+		PiecePane piece = new PiecePane(new Tassello('T'));
+		gameBoard.add(piece, 4, 4);
 		
 		/*
 		 * 	Mouse listeners
@@ -63,7 +67,6 @@ public class GameController implements Initializable {
 			e.consume();
 		});
 		
-		gameBoard.setOnDragOver(e -> { e.consume(); });
 		gameBoard.setOnDragDropped(e -> {
 			// Calcola la posizione nella griglia
 			Position p = new Position(e, gameBoard);
