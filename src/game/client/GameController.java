@@ -4,7 +4,9 @@ import java.net.URL;
 import java.util.ResourceBundle;
 
 import game.Tassello;
-import game.client.elements.PiecePane;
+import game.client.gui.BoardController;
+import game.client.gui.PiecePane;
+import game.client.gui.Position;
 import game.Scrabble;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;

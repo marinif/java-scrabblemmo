@@ -1,4 +1,4 @@
-package game.client.elements;
+package game.client.gui;
 
 import java.io.File;
 import java.net.URL;

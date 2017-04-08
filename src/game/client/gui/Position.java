@@ -1,6 +1,7 @@
-package game.client;
+package game.client.gui;
 
 import javafx.scene.input.*;
+import game.client.MainApplication;
 import javafx.geometry.Bounds;
 import javafx.scene.*;
 
