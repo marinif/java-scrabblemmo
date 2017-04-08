@@ -8,9 +8,15 @@ import game.client.gui.BoardController;
 import game.client.gui.PiecePane;
 import game.client.gui.Position;
 import game.Scrabble;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.Pane;
+import javafx.scene.Node;
+import javafx.scene.SnapshotParameters;
+import javafx.scene.image.WritableImage;
 import javafx.scene.input.*;
 
 public class GameController implements Initializable {
@@ -19,18 +25,19 @@ public class GameController implements Initializable {
 	@FXML GridPane letterArray;
 	
 	// Meccaniche di gioco
-	Scrabble game;
+	//Scrabble game;
+	BoardController board;
 
 	@Override
 	public void initialize(URL location, ResourceBundle resources) {
 		System.out.println("ciao");
 		
 		// Imposta la griglia
-		game = new Scrabble();
-		game.setGriglia(gameBoard);
+		//game = new Scrabble();
+		board = new BoardController(gameBoard);
 		
-		PiecePane piece = new PiecePane(new Tassello('T'));
-		gameBoard.add(piece, 4, 4);
+		Tassello piece = new Tassello('T');
+		board.add(piece, 4, 4);
 		
 		/*
 		 * 	Mouse listeners
@@ -48,7 +55,7 @@ public class GameController implements Initializable {
 			System.out.print(x + ", " + y);
 			
 			// Preleva il pezzo
-			Tassello c = game.getTassello(x, y);
+			PiecePane c = board.get(x, y);
 			// Se puo' essere spostato, inserirlo nella dragboard
 			//if(c != null && c.canMove()) {
 				Dragboard db = gameBoard.startDragAndDrop(TransferMode.MOVE);
@@ -56,8 +63,14 @@ public class GameController implements Initializable {
 				//content.putString(Character.toString(c.lettera));
 				content.putString("ciao");
 				
+				// Imposta immagine drag
+				WritableImage snap = new WritableImage(40, 40);
+				SnapshotParameters prop = new SnapshotParameters();
+				c.snapshot(prop, snap);
+				db.setDragView(snap);
+				
 				db.setContent(content);
-				game.removeTassello(x, y);
+				//game.removeTassello(x, y);
 			//}
 			
 			e.consume();
@@ -82,5 +95,4 @@ public class GameController implements Initializable {
 			e.consume();
 		});
 	}
-
 }

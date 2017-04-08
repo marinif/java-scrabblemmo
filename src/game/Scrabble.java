@@ -9,37 +9,15 @@ import javafx.scene.layout.Pane;
 public class Scrabble {
 	/** Lista contenente tutti i tasselli utilizzabili nella partita */
 	private ArrayList<Tassello> sacco = new ArrayList<>(120);
-	
-	/** Colori delle caselle */
-	private final Colore[][] coloriCaselle = new Colore[15][15];
-	private static enum Colore { ROSSO, ROSA, VERDE, BIANCO, BLU };
-	
 	private Tassello[][] caselle = new Tassello[15][15];
 	
-	public Scrabble() {
-		// Inizializza i colori
-		for(int x=0;x<15;x++){
-			for(int y =0;y<15;y++){
-				// ROSSO
-				if((x==0 || x==7 || x==14) && (y==0 || y==7 || y==14) && (x != 7 && y != 7)){
-					coloriCaselle[x][y] = Colore.ROSSO;
-				}
-				// BLU
-				else if(((y==5 || y==9) && ((x-1)%4 == 0)) ||((x==5 || x==9) && ((y-1)%4 == 0)))
-					coloriCaselle[x][y] = Colore.BLU;
-				//BIANCO
-				else if(((x==14 || x==0) && (y==3 || y==11)) || ((y==14 || y==0) && (x==3 || x==11)) || ((x==6 || x==8) &&(y==6 || y==8)) || ((x==6 || x==8) &&(y==2 || y==12)) || ((y==6 || y==8) && (x==2 || x==12)) || (x==7) && (y==3 || y==11) || (y==7) && (x==3 || x==11))
-					coloriCaselle[x][y] = Colore.BIANCO;
-				// ROSA
-				else if((x == y) || (y == 14 - x))
-					coloriCaselle[x][y] = Colore.ROSA;
-				// VERDE
-				else
-					coloriCaselle[x][y] = Colore.VERDE;
-			}
-		}
-		
-		
+	public static enum Azione { INIZIO_MOSSA, FINE_MOSSA, RESA, FINE, ERRORE };
+	
+	Giocatore playerA, playerB;
+	
+	public Scrabble(Giocatore a, Giocatore b) {
+		playerA = a;
+		playerB = b;
 		
 		// Inizializza i tasselli nel sacco nelle quantita' permesse dal regolamento
 		for(int i = 0; i < 14; i++)
@@ -98,8 +76,89 @@ public class Scrabble {
 			sacco.add(new Tassello(' '));
 	}
 	
+	/*
+	 * 	GESTIONE PARTITA
+	 */
+	
+	public void runGame() {
+		boolean running = true;
+		
+		while(running) {
+			String motivo = null;
+			
+			try {
+				// Permetti mossa a giocatore A
+				if(motivo == null) {
+					motivo = calcolaMossa(playerA);
+					motivo = (motivo != null ? "Giocatore B: " + motivo : null);
+				}
+				// Permetti mossa a giocatore B
+				if(motivo == null) {
+					motivo = calcolaMossa(playerB);
+					motivo = (motivo != null ? "Giocatore B: " + motivo : null);
+				}
+			}
+			catch(IllegalArgumentException e) {
+				motivo = "Server: errore";
+				e.printStackTrace();
+			}
+			
+			// Verifica se partita terminata
+			
+			
+			// Comunica fine partita se necessario
+			if(motivo != null) {
+				playerA.finePartita(motivo);
+				playerB.finePartita(motivo);
+			}
+		}
+	};
+	
+	private String calcolaMossa(Giocatore g) throws IllegalArgumentException {
+		String motivoFine = null;
+		
+		Azione azione = g.faiMossa();
+		
+		switch(azione) {
+		case ERRORE:
+			motivoFine = "Errore di comunicazione";
+			break;
+		case FINE_MOSSA:
+			break;
+		case RESA:
+			motivoFine = "Mi arrendo!";
+			break;
+		default:
+			throw new IllegalArgumentException("Azione '" + azione.toString() + "' non permessa eseguita dal giocatore A");
+		}
+		
+		return motivoFine;
+	}
+	
+	/** Pesca un tassello random dal sacchetto */
+	public Tassello pescaTassello() {
+		int random = -1;
+		
+		// Si assicura che il numero random sia nel range accettabile (spesso il Math.random e' fuori dal range 0.0~1.0)
+		while(!(random >= 0 && random < sacco.size()))
+			random = (int) (Math.round(Math.random() * sacco.size()) - 1);
+		
+		return sacco.remove(random);
+	}
+	
+	/*
+	 * 	AZIONI SECONDARIE
+	 */
+	
 	public Tassello getTassello(int x, int y) {
 		return caselle[x][y];
+	}
+	
+	public void spostaTassello(int x1, int y1, int x2, int y2) throws IllegalAccessException {
+		if(caselle[x2][y2] != null)
+			throw new IllegalAccessException("");
+		caselle[x2][y2] = caselle[x1][y1];
+		caselle[x1][y1] = null;
 	}
 	
 	public void putTassello(Tassello t, int x, int y) {
@@ -110,36 +169,5 @@ public class Scrabble {
 	
 	public void removeTassello(int x, int y) {
 		caselle[x][y] = null;
-	}
-	
-	private String convertiColore(Colore c) {
-		switch(c){
-		case ROSSO:
-			return "#d62b3c";
-		case ROSA:
-			return "#dba287";
-		case VERDE:
-			return "#068f6e";
-		case BIANCO:
-			return "#a5c7d2";
-		case BLU:
-			return "#1c7dd8";
-		default:
-			return "#000000";
-		}
-	}
-	
-	public void setGriglia(GridPane grid) {
-		for(int x = 0; x < 15; x++)
-			for(int y = 0; y < 15; y++) {
-				Pane pane = new AnchorPane();
-				pane.setStyle(
-						"-fx-background-color: " + convertiColore(coloriCaselle[x][y]) + ";" +
-						"-fx-border-style: solid outside; -fx-border-width: 1; -fx-border-color: #222;"
-				);
-				
-				grid.add(pane, x, y);
-				pane.applyCss();
-			}	
 	}
 }
