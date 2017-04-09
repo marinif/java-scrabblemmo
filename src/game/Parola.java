@@ -1,3 +1,4 @@
+package game;
 
 public class Parola {
 	private int xi;
