@@ -81,18 +81,20 @@ public class MainApplication extends Application {
 		d1.setHeaderText("Giocatore 1");
 		d1.setContentText("Inserisci il tuo nome:");
 		Optional<String> r1 = d1.showAndWait();
-		
-		if(!r1.isPresent()) Platform.exit();
+		if(!r1.isPresent())
+			Platform.exit();
+		else
+			n1 = r1.get();
 		
 		TextInputDialog d2 = new TextInputDialog();
 		d2.setTitle("Scrabble MMO - partita locale");
 		d2.setHeaderText("Giocatore 1");
 		d2.setContentText("Inserisci il tuo nome:");
 		Optional<String> r2 = d2.showAndWait();
-
-
-		// The Java 8 way to get the response value (with lambda expression).
-		if()
+		if(!r2.isPresent())
+			Platform.exit();
+		else
+			n2 = r2.get();
 	}
 
 	private void alertOnline() {
