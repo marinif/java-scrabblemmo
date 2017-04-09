@@ -1,30 +1,34 @@
 package game;
 
 public class Parola {
-	private int xi;
-	private int yi;
-	private int xf;
-	private int yf;
+	public final int xi;
+	public final int yi;
+	public final int xf;
+	public final int yf;
 	private int punteggio;
 	
-	public Parola(int xi,int yi,int xf,int yf,int punteggio){
+	public Parola(int xi,int yi,int xf,int yf,Scrabble s){
 		this.xi=xi;
 		this.yi=yi;
 		this.xf=xf;
 		this.yf=yf;
-		this.punteggio=punteggio;
-	}
-	public int getXi(){
-		return xi;
+		//orizzontale
+		if(xi==xf){
+			int tmp=yi;
+			while(tmp<yf){
+				this.punteggio += s.getTassello(xi,tmp).getPunteggio();
+				tmp++;
+			}
+		}
+		//verticale
+		else if(yi==yf){
+			int tmp=xi;
+			while(tmp<xf){
+				punteggio += s.getTassello(tmp,yi).getPunteggio();
+				tmp++;
+			}
+		}
+		else punteggio = -1;
 	}
 	
-	public int getXf(){
-		return xf;
-	}
-	public int getYi(){
-		return yi;
-	}
-	public int getYf(){
-		return yf;
-	}
 }

@@ -171,22 +171,5 @@ public class Scrabble {
 		caselle[x][y] = null;
 	}
 	
-	public void calcolaParole(Parola p) {
-		//orizzontale
-		if(p.getXi()==p.getXf()){
-			int tmp=p.getYi();
-			while(tmp<p.getYf()){
-				p.setPunteggio(p.getPunteggio() + Scrabble.getTassello(p.getXi,tmp).getPunteggio);
-				tmp++;
-			}
-		}
-		//verticale
-		if(p.getYi()==p.getYf()){
-			int tmp=p.getXi();
-			while(tmp < p.getXf()){
-				p.setPunteggio(p.getPunteggio() + Scrabble.getTassello(p.getXi,tmp).getPunteggio);
-				tmp++;
-			}
-		}
-	}
+	
 }
