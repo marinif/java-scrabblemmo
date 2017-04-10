@@ -16,6 +16,7 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.Node;
 import javafx.scene.SnapshotParameters;
+import javafx.scene.control.Button;
 import javafx.scene.image.WritableImage;
 import javafx.scene.input.*;
 
@@ -24,8 +25,10 @@ public class GameController implements Initializable {
 	@FXML GridPane gameBoard;
 	@FXML GridPane letterArray;
 	
+	@FXML Button btnRandom;
+	
 	// Meccaniche di gioco
-	//Scrabble game;
+	Scrabble game;
 	BoardController board;
 
 	@Override
@@ -33,65 +36,14 @@ public class GameController implements Initializable {
 		System.out.println("ciao");
 		
 		// Imposta la griglia
-		//game = new Scrabble();
-		board = new BoardController(gameBoard);
+		game = new Scrabble(new GiocatoreLocale("lul1"), new GiocatoreLocale("lul2"));
+		board = new BoardController(game, gameBoard, letterArray);
 		
 		Tassello piece = new Tassello('T');
 		board.add(piece, 4, 4);
 		
-		/*
-		 * 	Mouse listeners
-		 */
-		
-		// Per tutte le caselle
-		
-		
-		// Draggato da
-		gameBoard.setOnDragDetected(e -> {
-			// Calcola la posizione nella griglia
-			Position p = new Position(e, gameBoard);
-			int x = (int)Math.floor(p.x / 40);
-			int y = (int)Math.floor(p.y / 40);
-			System.out.print(x + ", " + y);
-			
-			// Preleva il pezzo
-			PiecePane c = board.get(x, y);
-			// Se puo' essere spostato, inserirlo nella dragboard
-			//if(c != null && c.canMove()) {
-				Dragboard db = gameBoard.startDragAndDrop(TransferMode.MOVE);
-				ClipboardContent content = new ClipboardContent();
-				//content.putString(Character.toString(c.lettera));
-				content.putString("ciao");
-				
-				// Imposta immagine drag
-				WritableImage snap = new WritableImage(40, 40);
-				SnapshotParameters prop = new SnapshotParameters();
-				c.snapshot(prop, snap);
-				db.setDragView(snap);
-				
-				db.setContent(content);
-				//game.removeTassello(x, y);
-			//}
-			
-			e.consume();
-		});
-		
-		// Draggato su
-		gameBoard.setOnDragOver(e -> {
-			System.out.println("Dragged over");
-			e.consume();
-		});
-		
-		gameBoard.setOnDragDropped(e -> {
-			// Calcola la posizione nella griglia
-			Position p = new Position(e, gameBoard);
-			int x = (int)Math.floor(p.x / 40);
-			int y = (int)Math.floor(p.y / 40);
-			System.out.println(" -> " +x + ", " + y);
-			
-			e.getDragboard().getContent(null);
-			e.getDragboard().getString();
-			
+		btnRandom.setOnMouseClicked(e -> {
+			board.addMano(game.pescaTassello());
 			e.consume();
 		});
 	}
