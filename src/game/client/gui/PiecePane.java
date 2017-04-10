@@ -11,11 +11,16 @@ import javafx.scene.layout.*;
 import javafx.scene.text.Font;
 
 public class PiecePane extends StackPane {
-	public PiecePane(Tassello t) {
-		try {
+	private static Image bgImage;
+	
+	static {
 		File f = new File("res/piece.png");
 		System.out.println(f.getAbsolutePath());
-		Image bgImage = new Image(f.toURI().toString());
+		bgImage = new Image(f.toURI().toString());
+	}
+	
+	public PiecePane(Tassello t) {
+		try {
 		ImageView bg = new ImageView(bgImage);
 		bg.setFitWidth(40);
 		bg.setFitHeight(40);
