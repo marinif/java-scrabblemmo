@@ -1,8 +1,10 @@
 package game;
 
-import java.util.Scanner;
-import java.io.*;
 import java.util.ArrayList;
+
+import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.GridPane;
+import javafx.scene.layout.Pane;
 
 public class Scrabble {
 	/** Lista contenente tutti i tasselli utilizzabili nella partita */
@@ -168,5 +170,4 @@ public class Scrabble {
 	public void removeTassello(int x, int y) {
 		caselle[x][y] = null;
 	}
-	
 }
