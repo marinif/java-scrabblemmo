@@ -9,7 +9,9 @@ import javafx.scene.layout.Pane;
 public class Scrabble {
 	/** Lista contenente tutti i tasselli utilizzabili nella partita */
 	private ArrayList<Tassello> sacco = new ArrayList<>(120);
+	
 	private Tassello[][] caselle = new Tassello[15][15];
+	private boolean[][] permessiCaselle = new boolean[15][15];
 	
 	public static enum Azione { INIZIO_MOSSA, FINE_MOSSA, RESA, FINE, ERRORE };
 	
@@ -90,11 +92,15 @@ public class Scrabble {
 				// Permetti mossa a giocatore A
 				if(motivo == null) {
 					motivo = calcolaMossa(playerA);
+					bloccaCaselle();
 					motivo = (motivo != null ? "Giocatore B: " + motivo : null);
 				}
+				
+				
 				// Permetti mossa a giocatore B
 				if(motivo == null) {
 					motivo = calcolaMossa(playerB);
+					bloccaCaselle();
 					motivo = (motivo != null ? "Giocatore B: " + motivo : null);
 				}
 			}
@@ -133,6 +139,13 @@ public class Scrabble {
 		}
 		
 		return motivoFine;
+	}
+	
+	/** Blocca tutte le caselle con i tasselli gia' presenti */
+	private void bloccaCaselle() {
+		for(int x = 0; x < 15; x++)
+			for(int y = 0; y < 15; y++)
+				permessiCaselle[x][y] = (caselle[x][y] == null);
 	}
 	
 	/** Pesca un tassello random dal sacchetto */
