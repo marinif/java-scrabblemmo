@@ -8,7 +8,7 @@ import javafx.scene.layout.Pane;
 
 public class BoardController {
 	GridPane grid;
-	Scrabble game;
+	final Scrabble game;
 	
 	/** Colori delle caselle */
 	private final Colore[][] coloriCaselle = new Colore[15][15];
@@ -57,7 +57,7 @@ public class BoardController {
 	
 	
 	
-	private String convertiColore(Colore c) {
+	private static String convertiColore(Colore c) {
 		switch(c){
 		case ROSSO:
 			return "#d62b3c";
@@ -73,31 +73,5 @@ public class BoardController {
 			return "#000000";
 		}
 	}
-
-
-
-
-
-	public void add(Tassello piece, int i, int j) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	public PiecePane get(int x, int y) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-
-
-	public Tassello getTassello(int x, int y) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-
-
-
-
 	
 }

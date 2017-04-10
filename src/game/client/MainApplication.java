@@ -19,7 +19,7 @@ import javafx.stage.Stage;
 
 public class MainApplication extends Application {
 	public static Stage primaryStage;
-	private Scrabble game;
+	Scrabble game;
 
 	public static void main(String[] args) {
 		LauncherImpl.launchApplication(MainApplication.class, args);
