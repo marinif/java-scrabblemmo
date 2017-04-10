@@ -14,6 +14,7 @@ import javafx.scene.layout.Pane;
 public class BoardController {
 	// Mano
 	GridPane hand;
+	PiecePane[] handPieces = new PiecePane[7];
 	
 	// Scacchiera
 	GridPane grid;
@@ -74,70 +75,131 @@ public class BoardController {
 					e.consume();
 				});
 				
-				pane.setOnDragOver(e -> {
-		            e.acceptTransferModes(TransferMode.MOVE);
-		            e.consume();
-		        });  
-				
-				pane.setOnDragDropped(e -> {
-					e.acceptTransferModes(TransferMode.MOVE);
-
-					// Preleva posizione sorgente
-					String pos1 = e.getDragboard().getString();
-					int x1 = Integer.parseInt(pos1.substring(0, pos1.indexOf(',')));
-					int y1 = Integer.parseInt(pos1.substring(pos1.indexOf(',')+1, pos1.length()));
-					
-					// Calcola posizione destinazione
-					Position p = new Position(e, grid);
-					int x2 = (int)Math.floor(p.x / 40);
-					int y2 = (int)Math.floor(p.y / 40);
-					
-					System.out.println(x1 + "," + y1 + " -> " +x2 + "," + y2);
-					
-					try {
-						// Gestisci il caso in cui il tassello viene aggiunto da fuori
-						if(x1 >= 15 || y1 >= 15) {
-							//add()
-						}
-						
-						else if(get(x2, y2) == null) {
-							move(x1, y1, x2, y2);
-							e.setDropCompleted(true);
-							e.consume();
-						} else {
-							e.setDropCompleted(true);
-							e.consume();
-						}
-					} catch(IllegalAccessException e1) {};
-						
-					
-					
-					
-				});
 			}
+		
+		// Listener per la plancia
+		grid.setOnDragOver(e -> {
+            e.acceptTransferModes(TransferMode.MOVE);
+            e.consume();
+        });  
+		
+		grid.setOnDragDropped(e -> {
+			e.acceptTransferModes(TransferMode.MOVE);
+
+			// Preleva posizione sorgente
+			String pos = e.getDragboard().getString();
+			char origin = pos.charAt(0);
+			int x1 = Integer.parseInt(pos.substring(2, pos.indexOf(',')));
+			int y1 = Integer.parseInt(pos.substring(pos.indexOf(',')+1, pos.length()));
+			
+			// Calcola posizione destinazione
+			Position p = new Position(e, grid);
+			int x2 = (int)Math.floor(p.x / 40);
+			int y2 = (int)Math.floor(p.y / 40);
+			
+			System.out.println(x1 + "," + y1 + " -> " +x2 + "," + y2);
+			
+			try {
+
+				if(get(x2, y2) == null) {
+					if(origin == 'g')
+						move(x1, y1, x2, y2);
+					else {
+						// Ottieni e rimuovi il tassello dal leggio
+						PiecePane pp = handPieces[x1];
+						handPieces[x1] = null;
+						hand.getChildren().remove(pp);
+						
+						// Inserisci tassello nella plancia
+						add(pp.piece, x2, y2);
+					}
+					
+					e.setDropCompleted(true);
+					e.consume();
+				} else {
+					e.setDropCompleted(true);
+					e.consume();
+				}
+			} catch(IllegalAccessException e1) {};
+		});
+		
+		// Listener per il leggio
+		hand.setOnDragOver(e -> {
+            e.acceptTransferModes(TransferMode.MOVE);
+            e.consume();
+        });  
+		
+		hand.setOnDragDropped(e -> {
+			e.acceptTransferModes(TransferMode.MOVE);
+
+			// Preleva posizione sorgente
+			String pos = e.getDragboard().getString();
+			char origin = pos.charAt(0);
+			int x1 = Integer.parseInt(pos.substring(2, pos.indexOf(',')));
+			int y1 = Integer.parseInt(pos.substring(pos.indexOf(',')+1, pos.length()));
+			
+			// Calcola posizione destinazione
+			Position p = new Position(e, hand);
+			int x2 = (int)Math.floor(p.x / 40);
+			
+			System.out.println(x1 + "," + y1 + " -> " +x2);
+			
+			try {
+				if(handPieces[x2] == null) {
+					if(origin == 'g') {
+						addMano(remove(x1, y1));
+					}
+					else {
+						// Ottieni e rimuovi il tassello dal leggio
+						PiecePane pp = handPieces[x1];
+						handPieces[x1] = null;
+						hand.getChildren().remove(pp);
+						
+						// Inserisci tassello nel leggio
+						addMano(pp.piece);
+					}
+					
+					e.setDropCompleted(true);
+					e.consume();
+				} else {
+					e.setDropCompleted(true);
+					e.consume();
+				}
+			} catch(Exception e1) { e1.printStackTrace(); };
+		});
 	}
 
 	/*
-	 * 	Scacchiera
+	 * 	Plancia
 	 */
 	
 	private PiecePane getPiecePaneInstance(Tassello t) {
 		PiecePane p = new PiecePane(t);
 		p.setOnDragDetected(e -> {
-			// Calcola la posizione nella griglia
-			Position point = new Position(e, grid);
+			// Trova l'origine del tassello
+			//	'g' per la griglia di gioco
+			//	'h' per la
+			char origin = (grid.getChildren().contains(p) ? 'g' : 'h');
+			
+			
+			// Calcola la posizione nella plancia
+			Position point;
+			
+			if(origin == 'g')
+				point = new Position(e, grid);
+			else
+				point = new Position(e, hand);
+			
 			int xx = (int)Math.floor(point.x / 40);
 			int yy = (int)Math.floor(point.y / 40);
 			System.out.println("Drag started");
 			
 			// Se puo' essere spostato, inserirlo nella dragboard
-			//if(c != null && c.canMove()) {
+			if(origin == 'h' || (origin == 'g' && game.canMove(xx, yy))) {
 				Dragboard db = p.startDragAndDrop(TransferMode.MOVE);
 				ClipboardContent content = new ClipboardContent();
-				//content.putString(Character.toString(c.lettera));
-				content.putString(xx + "," + yy);
+				content.putString(origin + ":" + xx + "," + yy);
 				db.setContent(content);
-				
 				
 				// Imposta immagine drag
 				WritableImage snap = new WritableImage(40, 40);
@@ -145,10 +207,7 @@ public class BoardController {
 				p.snapshot(prop, snap);
 				db.setDragView(snap);
 				p.setVisible(false);
-				
-				
-				//game.removeTassello(x, y);
-			//}
+			}
 			
 			e.consume();
 		});
@@ -185,19 +244,28 @@ public class BoardController {
 		grid.add(p, x2, y2);
 		pieces[x2][y2] = p;		
 	}
-
-	public Tassello getTassello(int x, int y) {
-		// TODO Auto-generated method stub
-		return null;
+	
+	public Tassello remove(int x, int y) {
+		grid.getChildren().remove(pieces[x][y]);
+		return game.removeTassello(x, y);
 	}
 	
 	/*
-	 * 	Mano
+	 * 	Leggio
 	 */
-	public void addMano(Tassello t) {
+	public boolean addMano(Tassello t) {
 		PiecePane p = getPiecePaneInstance(t);
 		
-		hand.getChildren().add(p);
+		for(int i = 0; i < 7; i++) {
+			if(handPieces[i] == null) {
+				handPieces[i] = p;
+				hand.add(p, i, 0);
+				
+				return true;
+			}
+		}
+		
+		return false;
 	}
 	
 	
