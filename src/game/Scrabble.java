@@ -179,4 +179,7 @@ public class Scrabble {
 	public void removeTassello(int x, int y) {
 		caselle[x][y] = null;
 	}
+	public void nuoveParole(Scrabble s){
+		
+	}
 }
