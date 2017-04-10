@@ -10,6 +10,7 @@ public class Parola {
 	public final int xf;
 	public final int yf;
 	private int punteggio;
+	private String parola;
 	
 	static{
 		//le parole del dizionario nel file wordsita.txt vengono caricate in un array
@@ -38,6 +39,7 @@ public class Parola {
 			int tmp=yi;
 			while(tmp<yf){
 				this.punteggio += s.getTassello(xi,tmp).getPunteggio();
+				parola += s.getTassello(xi,tmp).lettera;
 				tmp++;
 			}
 		}
@@ -46,6 +48,7 @@ public class Parola {
 			int tmp=xi;
 			while(tmp<xf){
 				punteggio += s.getTassello(tmp,yi).getPunteggio();
+				parola += s.getTassello(tmp,yi).lettera;
 				tmp++;
 			}
 		}
