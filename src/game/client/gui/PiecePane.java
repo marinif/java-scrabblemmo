@@ -3,6 +3,8 @@ package game.client.gui;
 import java.io.File;
 
 import game.Tassello;
+import javafx.scene.Node;
+import javafx.scene.Parent;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -42,5 +44,12 @@ public class PiecePane extends StackPane {
 		this.getChildren().add(pointPane);
 		}
 		catch(Exception e) { e.printStackTrace(); }
+	}
+	
+	public void remove() {
+		Parent parent = getParent();
+		
+		if(parent != null && parent instanceof GridPane)
+			((GridPane) parent).getChildren().remove(this);
 	}
 }

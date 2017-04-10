@@ -1,6 +1,7 @@
 package game;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class Scrabble {
 	/** Lista contenente tutti i tasselli utilizzabili nella partita */
@@ -137,6 +138,16 @@ public class Scrabble {
 		return motivoFine;
 	}
 	
+	/*
+	 *	CALCOLO PUNTEGGIO
+	 */
+	
+	public List<Parola> trovaParole(){
+		ArrayList<Parola> parole = new ArrayList<>();
+		
+		return parole;
+	}
+	
 	/** Blocca tutte le caselle con i tasselli gia' presenti */
 	private void bloccaCaselle() {
 		for(int x = 0; x < 15; x++)
@@ -189,7 +200,9 @@ public class Scrabble {
 		caselle[x][y] = null;
 		return t;
 	}
-	public void nuoveParole(Scrabble s){
-		
+	
+	public void riciclaTassello(Tassello t) {
+		sacco.add(t);
 	}
+	
 }
