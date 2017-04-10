@@ -14,7 +14,7 @@ import javafx.scene.layout.Pane;
 public class BoardController {
 	// Mano
 	GridPane hand;
-	PiecePane[] handPieces = new PiecePane[7];
+	public PiecePane[] handPieces = new PiecePane[7];
 	
 	// Scacchiera
 	GridPane grid;
@@ -108,7 +108,7 @@ public class BoardController {
 						// Ottieni e rimuovi il tassello dal leggio
 						PiecePane pp = handPieces[x1];
 						handPieces[x1] = null;
-						hand.getChildren().remove(pp);
+						pp.remove();
 						
 						// Inserisci tassello nella plancia
 						add(pp.piece, x2, y2);
@@ -153,7 +153,7 @@ public class BoardController {
 						// Ottieni e rimuovi il tassello dal leggio
 						PiecePane pp = handPieces[x1];
 						handPieces[x1] = null;
-						hand.getChildren().remove(pp);
+						pp.remove();
 						
 						// Inserisci tassello nel leggio
 						addMano(pp.piece);
@@ -265,6 +265,7 @@ public class BoardController {
 			}
 		}
 		
+		game.riciclaTassello(t);
 		return false;
 	}
 	
