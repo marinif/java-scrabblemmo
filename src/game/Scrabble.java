@@ -168,16 +168,26 @@ public class Scrabble {
 			throw new IllegalAccessException("");
 		caselle[x2][y2] = caselle[x1][y1];
 		caselle[x1][y1] = null;
+		
+		permessiCaselle[x2][y2] = true;
+		permessiCaselle[x1][y1] = true;
+	}
+	
+	public boolean canMove(int x, int y) {
+		return permessiCaselle[x][y];
 	}
 	
 	public void putTassello(Tassello t, int x, int y) {
 		if(caselle[x][y] == null)
 			caselle[x][y] = t;
-		//else
+		
+		permessiCaselle[x][y] = true;
 	}
 	
-	public void removeTassello(int x, int y) {
+	public Tassello removeTassello(int x, int y) {
+		Tassello t = caselle[x][y];
 		caselle[x][y] = null;
+		return t;
 	}
 	public void nuoveParole(Scrabble s){
 		
