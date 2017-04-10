@@ -1,6 +1,7 @@
 package game.client.gui;
 
 import game.Scrabble;
+import game.Scrabble.Colore;
 import game.Tassello;
 import javafx.scene.SnapshotParameters;
 import javafx.scene.image.WritableImage;
@@ -21,9 +22,7 @@ public class BoardController {
 	final Scrabble game;
 	PiecePane[][] pieces = new PiecePane[15][15];
 	
-	/** Colori delle caselle */
-	private final Colore[][] coloriCaselle = new Colore[15][15];
-	private static enum Colore { ROSSO, ROSA, VERDE, BIANCO, BLU };
+	
 	
 	public BoardController(Scrabble game, GridPane disBoard, GridPane handGrid) {
 		// ♫ We are maverick 救済なんていらない ♫
@@ -32,38 +31,20 @@ public class BoardController {
 		
 		hand = handGrid;
 		
-		// Inizializza i colori
-		for(int x=0;x<15;x++)
-			for(int y =0;y<15;y++){
-				// ROSSO
-				if((x==0 || x==7 || x==14) && (y==0 || y==7 || y==14) && (x != 7 && y != 7)){
-					coloriCaselle[x][y] = Colore.ROSSO;
-				}
-				// BLU
-				else if(((y==5 || y==9) && ((x-1)%4 == 0)) ||((x==5 || x==9) && ((y-1)%4 == 0)))
-					coloriCaselle[x][y] = Colore.BLU;
-				//BIANCO
-				else if(((x==14 || x==0) && (y==3 || y==11)) || ((y==14 || y==0) && (x==3 || x==11)) || ((x==6 || x==8) &&(y==6 || y==8)) || ((x==6 || x==8) &&(y==2 || y==12)) || ((y==6 || y==8) && (x==2 || x==12)) || (x==7) && (y==3 || y==11) || (y==7) && (x==3 || x==11))
-					coloriCaselle[x][y] = Colore.BIANCO;
-				// ROSA
-				else if((x == y) || (y == 14 - x))
-					coloriCaselle[x][y] = Colore.ROSA;
-				// VERDE
-				else
-					coloriCaselle[x][y] = Colore.VERDE;
-			}
-		
+		// Viene aggiunto un Pane colorato per ogni casella della plancia
 		for(int x = 0; x < 15; x++)
 			for(int y = 0; y < 15; y++) {
 				Pane pane = new AnchorPane();
 				pane.setStyle(
-						"-fx-background-color: " + convertiColore(coloriCaselle[x][y]) + ";" +
+						"-fx-background-color: " + convertiColore(Scrabble.coloriCaselle[x][y]) + ";" +
 						"-fx-border-style: solid outside; -fx-border-width: 1; -fx-border-color: #222;"
 				);
 				
 				grid.add(pane, x, y);
 				pane.applyCss();
 				pane.setOpacity(0.8);
+				
+				// Effetto illuminazione
 				
 				pane.setOnDragEntered(e -> {
 					pane.setOpacity(1.0);
@@ -74,98 +55,28 @@ public class BoardController {
 					pane.setOpacity(0.8);
 					e.consume();
 				});
-				
 			}
 		
-		// Listener per la plancia
+		// Drag'n'drop di tasselli sulla plancia
+		
 		grid.setOnDragOver(e -> {
             e.acceptTransferModes(TransferMode.MOVE);
             e.consume();
         });  
 		
 		grid.setOnDragDropped(e -> {
-			e.acceptTransferModes(TransferMode.MOVE);
-
-			// Preleva posizione sorgente
-			String pos = e.getDragboard().getString();
-			char origin = pos.charAt(0);
-			int x1 = Integer.parseInt(pos.substring(2, pos.indexOf(',')));
-			int y1 = Integer.parseInt(pos.substring(pos.indexOf(',')+1, pos.length()));
 			
-			// Calcola posizione destinazione
-			Position p = new Position(e, grid);
-			int x2 = (int)Math.floor(p.x / 40);
-			int y2 = (int)Math.floor(p.y / 40);
-			
-			System.out.println(x1 + "," + y1 + " -> " +x2 + "," + y2);
-			
-			try {
-
-				if(get(x2, y2) == null) {
-					if(origin == 'g')
-						move(x1, y1, x2, y2);
-					else {
-						// Ottieni e rimuovi il tassello dal leggio
-						PiecePane pp = handPieces[x1];
-						handPieces[x1] = null;
-						pp.remove();
-						
-						// Inserisci tassello nella plancia
-						add(pp.piece, x2, y2);
-					}
-					
-					e.setDropCompleted(true);
-					e.consume();
-				} else {
-					e.setDropCompleted(true);
-					e.consume();
-				}
-			} catch(IllegalAccessException e1) {};
 		});
 		
-		// Listener per il leggio
+		// Drag'n'drop di tasselli sul leggio
+		
 		hand.setOnDragOver(e -> {
             e.acceptTransferModes(TransferMode.MOVE);
             e.consume();
         });  
 		
 		hand.setOnDragDropped(e -> {
-			e.acceptTransferModes(TransferMode.MOVE);
-
-			// Preleva posizione sorgente
-			String pos = e.getDragboard().getString();
-			char origin = pos.charAt(0);
-			int x1 = Integer.parseInt(pos.substring(2, pos.indexOf(',')));
-			int y1 = Integer.parseInt(pos.substring(pos.indexOf(',')+1, pos.length()));
 			
-			// Calcola posizione destinazione
-			Position p = new Position(e, hand);
-			int x2 = (int)Math.floor(p.x / 40);
-			
-			System.out.println(x1 + "," + y1 + " -> " +x2);
-			
-			try {
-				if(handPieces[x2] == null) {
-					if(origin == 'g') {
-						addMano(remove(x1, y1));
-					}
-					else {
-						// Ottieni e rimuovi il tassello dal leggio
-						PiecePane pp = handPieces[x1];
-						handPieces[x1] = null;
-						pp.remove();
-						
-						// Inserisci tassello nel leggio
-						addMano(pp.piece);
-					}
-					
-					e.setDropCompleted(true);
-					e.consume();
-				} else {
-					e.setDropCompleted(true);
-					e.consume();
-				}
-			} catch(Exception e1) { e1.printStackTrace(); };
 		});
 	}
 
@@ -196,10 +107,12 @@ public class BoardController {
 			
 			// Se puo' essere spostato, inserirlo nella dragboard
 			if(origin == 'h' || (origin == 'g' && game.canMove(xx, yy))) {
+				
 				Dragboard db = p.startDragAndDrop(TransferMode.MOVE);
 				ClipboardContent content = new ClipboardContent();
-				content.putString(origin + ":" + xx + "," + yy);
+				content.put(Tassello.OBJECT_FORMAT, p);
 				db.setContent(content);
+				
 				
 				// Imposta immagine drag
 				WritableImage snap = new WritableImage(40, 40);

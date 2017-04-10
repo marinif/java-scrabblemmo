@@ -4,6 +4,32 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Scrabble {
+	public static enum Colore { ROSSO, ROSA, VERDE, BIANCO, BLU };
+	
+	/** Colori delle caselle */
+	public static final Colore[][] coloriCaselle = new Colore[15][15];
+	
+	// Inizializza i colori
+	static {
+		for(int x=0;x<15;x++)
+			for(int y =0;y<15;y++)
+				// ROSSO
+				if((x==0 || x==7 || x==14) && (y==0 || y==7 || y==14) && (x != 7 && y != 7))
+					coloriCaselle[x][y] = Colore.ROSSO;
+				// BLU
+				else if(((y==5 || y==9) && ((x-1)%4 == 0)) ||((x==5 || x==9) && ((y-1)%4 == 0)))
+					coloriCaselle[x][y] = Colore.BLU;
+				//BIANCO
+				else if(((x==14 || x==0) && (y==3 || y==11)) || ((y==14 || y==0) && (x==3 || x==11)) || ((x==6 || x==8) &&(y==6 || y==8)) || ((x==6 || x==8) &&(y==2 || y==12)) || ((y==6 || y==8) && (x==2 || x==12)) || (x==7) && (y==3 || y==11) || (y==7) && (x==3 || x==11))
+					coloriCaselle[x][y] = Colore.BIANCO;
+				// ROSA
+				else if((x == y) || (y == 14 - x))
+					coloriCaselle[x][y] = Colore.ROSA;
+				// VERDE
+				else
+					coloriCaselle[x][y] = Colore.VERDE;
+	}
+	
 	/** Lista contenente tutti i tasselli utilizzabili nella partita */
 	private ArrayList<Tassello> sacco = new ArrayList<>(120);
 	
@@ -17,6 +43,9 @@ public class Scrabble {
 	public Scrabble(Giocatore a, Giocatore b) {
 		playerA = a;
 		playerB = b;
+		
+		
+		
 		
 		// Inizializza i tasselli nel sacco nelle quantita' permesse dal regolamento
 		for(int i = 0; i < 14; i++)
@@ -120,7 +149,13 @@ public class Scrabble {
 	private String calcolaMossa(Giocatore g) throws IllegalArgumentException {
 		String motivoFine = null;
 		
-		Azione azione = g.faiMossa();
+		// Aggiungi i tasselli al leggio del giocatore
+		Tassello[] leggio = g.richiediTasselli();
+		for(int i = 0; i < 7; i++)
+			if(leggio[i] == null)
+				leggio[i] = pescaTassello();
+		
+		Azione azione = g.faiMossa(leggio);
 		
 		switch(azione) {
 		case ERRORE:

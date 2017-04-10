@@ -46,7 +46,7 @@ public class PiecePane extends StackPane {
 		catch(Exception e) { e.printStackTrace(); }
 	}
 	
-	public void remove() {
+	public void removeFromParent() {
 		Parent parent = getParent();
 		
 		if(parent != null && parent instanceof GridPane)

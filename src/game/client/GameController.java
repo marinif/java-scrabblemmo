@@ -81,7 +81,7 @@ public class GameController implements Initializable {
 					// Ottieni e rimuovi il tassello dal leggio
 					PiecePane pp = board.handPieces[x1];
 					board.handPieces[x1] = null;
-					pp.remove();
+					pp.removeFromParent();
 					
 					game.riciclaTassello(pp.piece);
 				}

@@ -5,8 +5,21 @@ import java.util.List;
 import game.Giocatore;
 import game.Scrabble.Azione;
 import game.Tassello;
+import game.client.gui.PiecePane;
 
 public class GiocatoreLocale extends Giocatore {
+	
+	private Tassello[] rack = new Tassello[7];
+	
+	
+	/*
+	 * Controllo giocatore
+	 */
+	
+	
+	/*
+	 * Controllo gioco
+	 */
 
 	public GiocatoreLocale(String nome) {
 		super(nome);
@@ -20,15 +33,13 @@ public class GiocatoreLocale extends Giocatore {
 	}
 
 	@Override
-	public Azione faiMossa() {
-		// TODO Auto-generated method stub
+	public Azione faiMossa(Tassello[][] plancia, Tassello[] leggio) {
+		rack = leggio;
 		return null;
 	}
-
-	@Override
-	public void daiTasselli(List<Tassello> tasselli) {
-		// TODO Auto-generated method stub
-		
+	
+	public Tassello[] richiediTasselli() {
+		return rack;
 	}
 
 	@Override
