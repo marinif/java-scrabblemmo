@@ -5,20 +5,11 @@ import java.util.ResourceBundle;
 
 import game.Tassello;
 import game.client.gui.BoardController;
-import game.client.gui.PiecePane;
-import game.client.gui.Position;
 import game.Scrabble;
-import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.GridPane;
-import javafx.scene.layout.Pane;
-import javafx.scene.Node;
-import javafx.scene.SnapshotParameters;
 import javafx.scene.control.Button;
-import javafx.scene.image.WritableImage;
-import javafx.scene.input.*;
 
 public class GameController implements Initializable {
 	// Elementi JavaFX

@@ -2,7 +2,6 @@ package game.client.gui;
 
 import game.Scrabble;
 import game.Tassello;
-import javafx.scene.Node;
 import javafx.scene.SnapshotParameters;
 import javafx.scene.image.WritableImage;
 import javafx.scene.input.ClipboardContent;

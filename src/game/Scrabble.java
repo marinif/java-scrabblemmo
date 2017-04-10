@@ -2,10 +2,6 @@ package game;
 
 import java.util.ArrayList;
 
-import javafx.scene.layout.AnchorPane;
-import javafx.scene.layout.GridPane;
-import javafx.scene.layout.Pane;
-
 public class Scrabble {
 	/** Lista contenente tutti i tasselli utilizzabili nella partita */
 	private ArrayList<Tassello> sacco = new ArrayList<>(120);

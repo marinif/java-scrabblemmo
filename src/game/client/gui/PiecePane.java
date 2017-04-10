@@ -1,7 +1,6 @@
 package game.client.gui;
 
 import java.io.File;
-import java.net.URL;
 
 import game.Tassello;
 import javafx.scene.control.Label;
