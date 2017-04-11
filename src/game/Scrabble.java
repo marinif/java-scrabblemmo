@@ -44,9 +44,6 @@ public class Scrabble {
 		playerA = a;
 		playerB = b;
 		
-		
-		
-		
 		// Inizializza i tasselli nel sacco nelle quantita' permesse dal regolamento
 		for(int i = 0; i < 14; i++)
 			sacco.add(new Tassello('A'));
@@ -103,84 +100,21 @@ public class Scrabble {
 		for(int i = 0; i < 2; i++)
 			sacco.add(new Tassello(' '));
 	}
-	
-	/*
-	 * 	GESTIONE PARTITA
-	 */
-	
-	public void runGame() {
-		boolean running = true;
-		
-		while(running) {
-			String motivo = null;
-			
-			try {
-				// Permetti mossa a giocatore A
-				if(motivo == null) {
-					motivo = calcolaMossa(playerA);
-					bloccaCaselle();
-					motivo = (motivo != null ? "Giocatore B: " + motivo : null);
-				}
-				
-				
-				// Permetti mossa a giocatore B
-				if(motivo == null) {
-					motivo = calcolaMossa(playerB);
-					bloccaCaselle();
-					motivo = (motivo != null ? "Giocatore B: " + motivo : null);
-				}
-			}
-			catch(IllegalArgumentException e) {
-				motivo = "Server: errore";
-				e.printStackTrace();
-			}
-			
-			// Verifica se partita terminata
-			
-			
-			// Comunica fine partita se necessario
-			if(motivo != null) {
-				playerA.finePartita(motivo);
-				playerB.finePartita(motivo);
-			}
-		}
-	};
-	
-	private String calcolaMossa(Giocatore g) throws IllegalArgumentException {
-		String motivoFine = null;
-		
-		// Aggiungi i tasselli al leggio del giocatore
-		Tassello[] leggio = g.richiediTasselli();
-		for(int i = 0; i < 7; i++)
-			if(leggio[i] == null)
-				leggio[i] = pescaTassello();
-		
-		Azione azione = g.faiMossa(leggio);
-		
-		switch(azione) {
-		case ERRORE:
-			motivoFine = "Errore di comunicazione";
-			break;
-		case FINE_MOSSA:
-			break;
-		case RESA:
-			motivoFine = "Mi arrendo!";
-			break;
-		default:
-			throw new IllegalArgumentException("Azione '" + azione.toString() + "' non permessa eseguita dal giocatore A");
-		}
-		
-		return motivoFine;
-	}
-	
+
 	/*
 	 *	CALCOLO PUNTEGGIO
 	 */
 	
-	public List<Parola> trovaParole(){
+	public static List<Parola> findWords(char[][] board){
 		ArrayList<Parola> parole = new ArrayList<>();
 		
 		return parole;
+	}
+	
+	public static List<Parola> checkWords(List<Parola> words) {
+		ArrayList<Parola> incorrectWords = new ArrayList<>();
+		
+		return incorrectWords;
 	}
 	
 	/** Blocca tutte le caselle con i tasselli gia' presenti */

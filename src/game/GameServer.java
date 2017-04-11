@@ -5,13 +5,14 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import game.Scrabble.Azione;
 
 public class GameServer extends Thread {
-	ArrayList<Tassello> bag = new ArrayList<>();
-	Tassello[][] board = new Tassello[15][15];
+	ArrayList<Character> bag = new ArrayList<>();
+	char[][] board = new char[15][15];
 	
 	List<Parola> words = new ArrayList<>();
 	
@@ -23,7 +24,7 @@ public class GameServer extends Thread {
 		playerOne = a;
 		playerTwo = b;
 		
-		// Wait for players
+		// Wait for playersß
 		
 		running = true;
 	}
@@ -34,6 +35,13 @@ public class GameServer extends Thread {
 			Socket current = playerOne;
 			while(running) {
 				loop(current);
+				
+				//TODO: Trovare le condizioni per la fine della partita
+				if(false) {
+					// Invia messaggio fine a entrambi i giocatori
+					
+					// Chiudi le connessioni
+				}
 				
 				// Swap players
 				current = (current == playerOne ? playerTwo : playerOne);
@@ -53,7 +61,7 @@ public class GameServer extends Thread {
 			int n = objin.readInt();
 			
 			// Send needed tiles
-			Tassello[] rack = new Tassello[n];
+			char[] rack = new char[n];
 			for(int i = 0; i < n; i++)
 				rack[i] = randomTile();
 			
@@ -77,7 +85,7 @@ public class GameServer extends Thread {
 				}
 			
 			// Ask board
-			Tassello[][] newBoard = (Tassello[][])objin.readObject();
+			char[][] newBoard = (char[][])objin.readObject();
 			
 			// Find words
 			List<Parola> newWords = findWords(newBoard);
@@ -93,12 +101,11 @@ public class GameServer extends Thread {
 			board = newBoard;
 			
 			// Send points
-			int points = 0;
+			HashMap<String, Integer> points = new HashMap<>();
 			for(Parola word : playerWords)
-				points += 0;
-				//points += word.points;
+				points.put(word.toString(), word.points);
 			
-			objout.writeInt(points);
+			objout.writeObject(points);
 		}
 		catch(ClassNotFoundException e1) { e1.printStackTrace(); }
 	}
@@ -133,7 +140,7 @@ public class GameServer extends Thread {
 		
 	}
 	
-	public Tassello randomTile() {
+	public char randomTile() {
 		int random = -1;
 		
 		// Si assicura che il numero random sia nel range accettabile (spesso il Math.random e' fuori dal range 0.0~1.0)
@@ -143,7 +150,7 @@ public class GameServer extends Thread {
 		return bag.remove(random);
 	}
 	
-	public static List<Parola> findWords(Tassello[][] board) {
+	public static List<Parola> findWords(char[][] board) {
 		return null;
 	}
 }

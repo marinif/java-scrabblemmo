@@ -9,18 +9,27 @@ import java.net.SocketTimeoutException;
 import java.util.ArrayList;
 import java.util.Scanner;
 
+import game.GameServer;
 import game.Giocatore;
 import game.Scrabble;
 
 public abstract class MatchmakerServer {
 	public static final String VERSIONE_GIOCO = "0.0.1";
+	public static final int DEFAULT_PORT = 4010;
 	public static final int MAX_PARTITE = 100;
 	
 	static ArrayList<Thread> partite;
 	public static boolean running;
 	
 	public static void main(String[] args) throws IOException {
-		int porta = -1;
+		int porta = DEFAULT_PORT;
+		
+		// Trova parametro porta, altrimenti usa quella default
+		for(int i = 0; i < args.length; i++)
+			if(args[i].equals("-p") && i < (args.length - 1)) {
+				porta = Integer.parseInt(args[i+1]);
+				break;
+			}
 		
 		// Apri il server
 		ServerSocket server = new ServerSocket(porta);
@@ -83,8 +92,8 @@ public abstract class MatchmakerServer {
 						partite.add(new Thread() {
 							@Override
 							public void run() {
-								Scrabble partita = new Scrabble(a, b);
-								partita.runGame();
+								GameServer game = new GameServer(a, b);
+								game.run();
 							}
 						});
 					}

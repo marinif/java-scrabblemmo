@@ -5,6 +5,7 @@ import java.util.Optional;
 import com.sun.javafx.application.LauncherImpl;
 
 import game.Scrabble;
+import game.server.MatchmakerServer;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
@@ -27,24 +28,26 @@ public class MainApplication extends Application {
 	
 	@Override
 	public void start(Stage stage) throws Exception {
-		/*
 		// Dialog
-		Alert a1 = new Alert(AlertType.CONFIRMATION);
-		a1.setTitle("Scrabble MMO");
-		a1.setHeaderText("Inizio partita");
-		a1.setContentText("In quale modalita' vorresti giocare?");
+		TextInputDialog dialog = new TextInputDialog("localhost");
+		dialog.setTitle("Scrabble MMO");
+		dialog.setHeaderText("Look, a Text Input Dialog");
+		dialog.setContentText("Host e porta:");
+
+		// Traditional way to get the response value.
+		Optional<String> result = dialog.showAndWait();
+		if (!result.isPresent())
+		    System.exit(0);
 		
-		ButtonType btnOnline = new ButtonType("Online");
-		ButtonType btnLocale = new ButtonType("Locale");
-		ButtonType btnEsci = new ButtonType("Esci");
-		a1.getButtonTypes().setAll(btnOnline, btnLocale, btnEsci);
+		// Connessione al server
+		String socket = result.get();
+		String host = "localhost";
+		int port = MatchmakerServer.DEFAULT_PORT;
 		
-		
-		Optional<ButtonType> r1 = a1.showAndWait();
-		if(r1.get() == btnOnline) { alertOnline(); }
-		else if(r1.get() == btnLocale) { alertLocale(); }
-		else { Platform.exit(); return; }
-		*/
+		if(socket.indexOf(':')) {
+		String host = socket.substring(0, socket.indexOf(':'));
+		int port = Integer.parseInt( socket.substring(socket.indexOf(':') + 1, socket.length()) );
+		}
 		
 		// Inizializzazione dell'applicazione
 		this.primaryStage = stage;
@@ -72,33 +75,4 @@ public class MainApplication extends Application {
 		bg.fitHeightProperty().bind(parent.heightProperty());
 	}
 	
-
-	private void alertLocale() {
-		String n1, n2;
-		
-		TextInputDialog d1 = new TextInputDialog();
-		d1.setTitle("Scrabble MMO - partita locale");
-		d1.setHeaderText("Giocatore 1");
-		d1.setContentText("Inserisci il tuo nome:");
-		Optional<String> r1 = d1.showAndWait();
-		if(!r1.isPresent())
-			Platform.exit();
-		else
-			n1 = r1.get();
-		
-		TextInputDialog d2 = new TextInputDialog();
-		d2.setTitle("Scrabble MMO - partita locale");
-		d2.setHeaderText("Giocatore 1");
-		d2.setContentText("Inserisci il tuo nome:");
-		Optional<String> r2 = d2.showAndWait();
-		if(!r2.isPresent())
-			Platform.exit();
-		else
-			n2 = r2.get();
-	}
-
-	private void alertOnline() {
-		// TODO Auto-generated method stub
-		
-	}
 }
