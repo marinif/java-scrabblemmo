@@ -1,6 +1,11 @@
 package game.client;
 
+import java.io.IOException;
+import java.io.PrintStream;
+import java.net.Socket;
+import java.util.NoSuchElementException;
 import java.util.Optional;
+import java.util.Scanner;
 
 import com.sun.javafx.application.LauncherImpl;
 
@@ -12,6 +17,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.*;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
+import javafx.scene.control.ButtonBar.ButtonData;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.TextInputDialog;
 import javafx.scene.image.ImageView;
@@ -20,7 +26,10 @@ import javafx.stage.Stage;
 
 public class MainApplication extends Application {
 	public static Stage primaryStage;
-	Scrabble game;
+	
+	boolean connected = false;
+	Socket serverSocket;
+	String motd = null;
 
 	public static void main(String[] args) {
 		LauncherImpl.launchApplication(MainApplication.class, args);
@@ -28,26 +37,133 @@ public class MainApplication extends Application {
 	
 	@Override
 	public void start(Stage stage) throws Exception {
-		// Dialog
-		TextInputDialog dialog = new TextInputDialog("localhost");
-		dialog.setTitle("Scrabble MMO");
-		dialog.setHeaderText("Look, a Text Input Dialog");
-		dialog.setContentText("Host e porta:");
-
-		// Traditional way to get the response value.
-		Optional<String> result = dialog.showAndWait();
+		// Server connection
+		final TextInputDialog d1 = new TextInputDialog("localhost");
+		d1.setTitle("Scrabble MMO - Partita online");
+		d1.setHeaderText("Inserisci l'indirizzo del server di gioco");
+		d1.setContentText("Host e porta:");
+		
+		Optional<String> result = d1.showAndWait();
 		if (!result.isPresent())
 		    System.exit(0);
 		
 		// Connessione al server
 		String socket = result.get();
-		String host = "localhost";
-		int port = MatchmakerServer.DEFAULT_PORT;
+		final String host = (socket.indexOf(':') >= 0 ? socket.substring(0, socket.indexOf(':')) : "localhost");
+		final int port = (socket.indexOf(':') >= 0 ? Integer.parseInt( socket.substring(socket.indexOf(':') + 1, socket.length()) ) : MatchmakerServer.DEFAULT_PORT);
+
+		final Alert d2 = new Alert(AlertType.CONFIRMATION);
+		d2.setTitle("Scrabble MMO");
+		d2.setHeaderText(null);
+		d2.setContentText("Connessione al server in corso, attendere...");
+		ButtonType btnCancel = new ButtonType("Annulla");
+		d2.getButtonTypes().setAll(btnCancel);
 		
-		if(socket.indexOf(':')) {
-		String host = socket.substring(0, socket.indexOf(':'));
-		int port = Integer.parseInt( socket.substring(socket.indexOf(':') + 1, socket.length()) );
+		// Thread di connessione
+		Socket server = null;
+		Thread gameThread = new Thread() {
+			
+			@Override
+			public void run() {
+				this.setName("ConnectionThread");
+				
+				try {
+					serverSocket = new Socket(host, port);
+					
+					Scanner in = new Scanner(serverSocket.getInputStream());
+					PrintStream out = new PrintStream(serverSocket.getOutputStream());
+					
+					String auth = null;
+					
+					do {
+						Thread.sleep(100);
+						
+						if(in.hasNextLine()) {
+							auth = in.nextLine();
+							System.out.println("Received line: " + auth);
+							
+							switch(auth) {
+							case "auth:nome?":
+								out.println("bullpup");
+								out.flush();
+								break;
+								
+							case "auth:versione?":
+								out.println(Scrabble.VERSIONE_GIOCO);
+								out.flush();
+								break;
+								
+							case "auth:incompatibile!":
+								Platform.runLater(() -> {
+									Alert d4 = new Alert(AlertType.ERROR);
+									d4.setTitle("Scrabble MMO");
+									d4.setHeaderText("Errore di connessione");
+									d4.setContentText("Il server e' incompatibile con la versione del gioco " + Scrabble.VERSIONE_GIOCO);
+									
+									d4.showAndWait();
+									try { serverSocket.close(); }
+									catch(IOException e) { e.printStackTrace(); }
+									finally { System.exit(2); }
+								});
+								break;
+								
+							case "auth:motd!":
+								if(in.hasNextLine()) {
+									motd = in.nextLine();
+									System.out.println("MOTD: " + motd);
+								}
+								break;
+								
+							case "auth:aspetta!":
+								Platform.runLater(() -> {
+									//d2.close();
+									
+									Alert d5 = new Alert(AlertType.INFORMATION);
+									d2.setTitle("Scrabble MMO");
+									d2.setHeaderText(motd);
+									d2.setContentText("Connesso, in attesa di giocatori...");
+									//TODO: modificando il d2 invece di aprire un altro alert, l'alert e' buggato
+								});
+							}
+						}
+					} while(auth != "auth:fatto!");
+					
+					Platform.runLater(() -> {
+						connected = true;
+						d2.close();
+					});
+					
+					
+				} catch(Exception e) {
+					Platform.runLater(() -> {
+						e.printStackTrace();
+						//d2.close();
+						
+						Alert d3 = new Alert(AlertType.ERROR);
+						d3.setTitle("Scrabble MMO");
+						d3.setHeaderText("Errore di connessione");
+						d3.setContentText(e.getClass().getSimpleName() + ": " + e.getMessage());
+						
+						d3.showAndWait();
+						System.exit(2);
+					});
+				}
+				finally { 
+					// Chiudi alert di attesa
+					Platform.runLater(() -> { if(d2.isShowing()) d2.close(); });
+				}
+			}
+		};
+		
+		gameThread.start();
+		d2.showAndWait();
+		
+		if(!connected) {
+			try { serverSocket.close(); }
+			catch(IOException e) { e.printStackTrace(); }
+			finally { System.exit(0); }
 		}
+		
 		
 		// Inizializzazione dell'applicazione
 		this.primaryStage = stage;

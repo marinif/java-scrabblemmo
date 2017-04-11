@@ -21,6 +21,10 @@ public abstract class MatchmakerServer {
 	public static boolean running;
 	
 	public static void main(String[] args) throws IOException {
+		System.out.println("Scrabble MMO v" + Scrabble.VERSIONE_GIOCO);
+		System.out.println("Server di matchmaking, avvio...");
+		
+		
 		int porta = DEFAULT_PORT;
 		
 		// Trova parametro porta, altrimenti usa quella default
@@ -33,11 +37,13 @@ public abstract class MatchmakerServer {
 		// Apri il server
 		ServerSocket server = new ServerSocket(porta);
 		server.setSoTimeout(1000);
+		System.out.println("Server in ascolto sulla porta " + porta + "\n");
 		
 		// Apri thread di matchmaking
 		MatchmakingThread mm = new MatchmakingThread();
 		
 		// Attendi giocatori
+		running = true;
 		while(running) {
 			try {
 				Socket s = server.accept();
@@ -49,15 +55,14 @@ public abstract class MatchmakerServer {
 	}
 	
 	private static class MatchmakingThread extends Thread {
-		private ArrayList<Giocatore> players;
+		private volatile ArrayList<Giocatore> players = new ArrayList<>();
 		
 		public void aggiungiConnessione(Socket s) throws IOException {
 			PrintWriter out = new PrintWriter(s.getOutputStream());
 			Scanner in = new Scanner(s.getInputStream());
 			
-			// Verifica versione
 			out.println("auth:versione?"); out.flush();
-			if(in.nextLine() != VERSIONE_GIOCO) {
+			if(in.hasNextLine() && !in.nextLine().equals(Scrabble.VERSIONE_GIOCO)) {
 				out.println("auth:incompatibile!"); out.flush();
 				
 				out.close();
@@ -68,13 +73,21 @@ public abstract class MatchmakerServer {
 			
 			// Richiedi nome
 			out.println("auth:nome?"); out.flush();
-			String nome = in.nextLine();
+			String nome = null;
+			if(in.hasNextLine()) nome = in.nextLine();
+			
+			// Invia MotD
+			out.println("auth:motd!");
+			out.println("Benvenuti nel server di Kerber e Marini!");
+			out.flush();
 			
 			// Attendi partita
 			out.println("auth:aspetta!"); out.flush();
 			players.add(new GiocatoreRemoto(nome, s));
 			
-			this.notify();
+			System.out.println("Nuovo giocatore in attesa: " + nome);
+			
+			synchronized(this) { notify(); }
 		}
 		
 		@Override
@@ -91,13 +104,16 @@ public abstract class MatchmakerServer {
 						partite.add(new Thread() {
 							@Override
 							public void run() {
-								GameServer game = new GameServer(a, b);
-								game.run();
+								// Notifica i due giocatori
+								
+								
+								// Inizia gioco
+								System.out.println("Inizia il gioco! " + a.nome + " VS " + b.nome);
+								//GameServer game = new GameServer(a, b);
+								//game.run();
 							}
 						});
 					}
-						
-					
 				} catch (InterruptedException e) {
 					running = false;
 				}
