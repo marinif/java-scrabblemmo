@@ -146,22 +146,24 @@ public class Scrabble {
 		//lista di tutte le parole della griglia
 		ArrayList<Parola> parole= new ArrayList<Parola>();
 		
+		
+		
 		for(int i=0;i<15;i++)
 			for(int j=0;j<15;j++){
 				if(this.caselle[i][j] != null){ //se il tassello non è vuoto controllo se la parola c'era in precedenza
 					//appena si incontra una casella non vuota si scorre sia a destra che in basso per leggere la parola
 					//parola verticale
-					if(this.caselle[i+1][j] != null ){
+					if(this.caselle[i+1][j] != null && this.caselle[i-1][j] == null){
 						int k = i;
-						while(caselle[k+1][j] != null)
+						while(caselle[k][j] != null)
 							k++;
 						Parola p=new Parola(i,j,k,j,this);
 						parole.add(p);
 					}
 					//parola orizzontale
-					if(this.caselle[i][j+1] != null ){
+					if(this.caselle[i][j+1] != null && this.caselle[i][j-1] == null){
 						int k = j;
-						while(caselle[i][k+1] != null)
+						while(caselle[i][k] != null)
 							k++;
 						Parola p=new Parola(i,j,i,k,this);
 						parole.add(p);

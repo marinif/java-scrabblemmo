@@ -54,7 +54,7 @@ public class GameController implements Initializable {
 			String words = "";
 			
 			for(Parola p : game.trovaParole())
-				words += p + "\n";
+				words += p.parola + "\n";
 			
 			wordList.setText(words);
 		});
