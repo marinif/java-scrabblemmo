@@ -55,13 +55,11 @@ public class GameController {
 	 *  Gestione plancia
 	 */
 	public void setBoard(char[][] board) {
-		// TODO Auto-generated method stub
-		
+		this.board = board;
 	}
 
 	public Object getBoard() {
-		// TODO Auto-generated method stub
-		return null;
+		return board;
 	}
 	
 	/*
@@ -69,13 +67,20 @@ public class GameController {
 	 */
 
 	public void addRack(char[] rack) {
-		// TODO Auto-generated method stub
-		
+		int c = 0;
+		for(int i = 0; i < 7; i++)
+			if(this.rack[i] == '\0')
+				this.rack[i] = rack[c++];
 	}
 
 	public int getRackLength() {
-		// TODO Auto-generated method stub
-		return 0;
+		int n = 0;
+		
+		for(int i = 0; i < 7; i++)
+			if(this.rack[i] != '\0')
+				n++;
+				
+		return n;
 	}
 	
 	
@@ -101,7 +106,7 @@ public class GameController {
 		alert.showAndWait();
 	}
 
-	public void exception(Exception ex) {
+	public static void exception(Exception ex) {
 		Alert alert = new Alert(AlertType.ERROR);
 		alert.setTitle("Java exception");
 		alert.setHeaderText(ex.getClass().getSimpleName());
