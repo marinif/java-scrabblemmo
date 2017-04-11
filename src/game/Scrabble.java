@@ -4,6 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Scrabble {
+	public static final String VERSIONE_GIOCO = "0.0.1";
+	
+	
 	public static enum Colore { ROSSO, ROSA, VERDE, BIANCO, BLU };
 	
 	/** Colori delle caselle */

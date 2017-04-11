@@ -14,7 +14,6 @@ import game.Giocatore;
 import game.Scrabble;
 
 public abstract class MatchmakerServer {
-	public static final String VERSIONE_GIOCO = "0.0.1";
 	public static final int DEFAULT_PORT = 4010;
 	public static final int MAX_PARTITE = 100;
 	
