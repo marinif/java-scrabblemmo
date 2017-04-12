@@ -62,12 +62,16 @@ public class GameServer extends Thread {
 	
 	public void loop(Giocatore p) throws IOException {
 		Socket sock = p.socket;
+		
 		ObjectInputStream objin = new ObjectInputStream(sock.getInputStream());
 		ObjectOutputStream objout = new ObjectOutputStream(sock.getOutputStream());
+		objout.flush();
+		System.out.print(p.nome + ": connessione ObjectStream aperta");
 		
 		try {
 			// Synchronize board
 			objout.writeObject(board);
+			objout.flush();
 			
 			// Ask if tiles needed
 			int n = objin.readInt();
@@ -78,6 +82,7 @@ public class GameServer extends Thread {
 				rack[i] = bag.pesca();
 			
 			objout.writeObject(rack);
+			objout.flush();
 			
 			// Await end of his turn
 			// ...
@@ -109,7 +114,8 @@ public class GameServer extends Thread {
 				for(int i = 0; i < n; i++)
 					rack[i] = bag.pesca();
 				
-				objout.writeObject(rack); objout.flush();
+				objout.writeObject(rack);
+				objout.flush();
 					
 				
 			default:
@@ -128,7 +134,6 @@ public class GameServer extends Thread {
 				if(!words.contains(word)) {
 					words.add(word);
 					playerWords.add(word);
-					
 				}
 			
 			// Swap boards
@@ -142,6 +147,7 @@ public class GameServer extends Thread {
 			}
 			
 			objout.writeObject(points);
+			objout.flush();
 		}
 		catch(ClassNotFoundException e1) { e1.printStackTrace(); }
 	}

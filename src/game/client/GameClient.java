@@ -37,8 +37,10 @@ public class GameClient extends Thread {
 	}
 	
 	public void loop() throws IOException {
-		ObjectInputStream objin = new ObjectInputStream(server.getInputStream());
 		ObjectOutputStream objout = new ObjectOutputStream(server.getOutputStream());
+		objout.flush();
+		
+		ObjectInputStream objin = new ObjectInputStream(server.getInputStream());
 		
 		try {
 			// Receive board
@@ -48,6 +50,7 @@ public class GameClient extends Thread {
 			// Ask for missing tiles
 			int tiles = 7 - controller.getRackLength();
 			objout.writeInt(tiles);
+			objout.flush();
 			
 			// Receive missing tiles
 			char[] rack = (char[]) objin.readObject();
@@ -91,6 +94,7 @@ public class GameClient extends Thread {
 			
 			// Send board
 			objout.writeObject(controller.getBoard());
+			objout.flush();
 			
 			// Ask points
 			@SuppressWarnings("unchecked")
