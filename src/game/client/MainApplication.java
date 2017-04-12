@@ -181,10 +181,10 @@ public class MainApplication extends Application {
 		stage.setMinWidth(1024);
 		stage.setMinHeight(740);
 		
-		BorderPane root = null;
+		Pane root = null;
 		
 		try {
-			root = (BorderPane)FXMLLoader.load(getClass().getResource("game.fxml"));
+			root = (Pane)FXMLLoader.load(getClass().getResource("game.fxml"));
 		} catch(Exception e) {
 			e.printStackTrace();
 			System.exit(-1);
