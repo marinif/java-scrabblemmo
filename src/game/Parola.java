@@ -13,23 +13,8 @@ public class Parola {
 	public final int yf;
 	public int punteggio;
 	public final String parola;
-	public static ArrayList<String> dizionario=new ArrayList<String>();
 	
-	static{
-		//le parole del dizionario nel file wordsita.txt vengono caricate in un array
-		try{
-		    Scanner wordn= new Scanner(new FileInputStream("res/wordsita.txt"));
-		    
-		    while(wordn.hasNext()){
-		    	String s=wordn.nextLine();
-		    	dizionario.add(s);
-		    }
-		    wordn.close();
-		}catch(Exception e){
-			e.printStackTrace();
-		}
 	    
-	}
 	
 	public Parola(int xi,int yi,int xf,int yf,char[][] s){
 		this.xi=xi;

@@ -1,11 +1,13 @@
 package game;
 
+import java.io.FileInputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Scanner;
 
 public class Scrabble {
 	public static final String VERSIONE_GIOCO = "0.0.1";
-	
+	public static ArrayList<String> dizionario=new ArrayList<String>();
 	
 	public static enum Colore { ROSSO, ROSA, VERDE, BIANCO, BLU };
 	
@@ -15,6 +17,21 @@ public class Scrabble {
 	
 	// Inizializza i colori
 	static {
+		
+		
+		//le parole del dizionario nel file wordsita.txt vengono caricate in un array
+		try{
+		    Scanner wordn= new Scanner(new FileInputStream("res/wordsita.txt"));
+		    
+		    while(wordn.hasNext()){
+		    	String s=wordn.nextLine();
+		    	dizionario.add(s);
+		    }
+		    wordn.close();
+		}catch(Exception e){
+			e.printStackTrace();
+		}
+		
 		for(int x=0;x<15;x++)
 			for(int y =0;y<15;y++)
 				// ROSSO
@@ -78,22 +95,22 @@ public class Scrabble {
 				
 				for(int i=0;i<15;i++)
 					for(int j=0;j<15;j++){
-						if(caselle[i][j] != '\0'){ //se il tassello non è vuoto controllo se la parola c'era in precedenza
+						if(board[i][j] != '\0'){ //se il tassello non è vuoto controllo se la parola c'era in precedenza
 							//appena si incontra una casella non vuota si scorre sia a destra che in basso per leggere la parola
 							//parola verticale
-							if(caselle[i+1][j] != '\0' && caselle[i-1][j] == '\0'){
+							if(board[i+1][j] != '\0' && board[i-1][j] == '\0'){
 								int k = i;
-								while(caselle[k][j] != '\0')
+								while(board[k][j] != '\0')
 									k++;
-								Parola p=new Parola(i,j,k,j,caselle);
+								Parola p=new Parola(i,j,k,j,board);
 								parole.add(p);
 							}
 							//parola orizzontale
-							if(caselle[i][j+1] != '\0' && caselle[i][j-1] == '\0'){
+							if(board[i][j+1] != '\0' && board[i][j-1] == '\0'){
 								int k = j;
-								while(caselle[i][k] != '\0')
+								while(board[i][k] != '\0')
 									k++;
-								Parola p=new Parola(i,j,i,k,caselle);
+								Parola p=new Parola(i,j,i,k,board);
 								parole.add(p);
 							}
 						}
@@ -106,6 +123,14 @@ public class Scrabble {
 	 * @returns lista di parole scorrette*/
 	public static List<Parola> verificaParole(List<Parola> words) {
 		ArrayList<Parola> incorrectWords = new ArrayList<>();
+		
+		for(int i =0; i<words.size();i++){
+			incorrectWords.add(words.get(i));
+		}
+		for(int i =0; i < dizionario.size();i++){
+			if(incorrectWords.get(i).parola == dizionario.get(i))
+				incorrectWords.remove(i);
+		}
 		
 		return incorrectWords;
 	}
