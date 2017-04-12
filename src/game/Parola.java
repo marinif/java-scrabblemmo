@@ -11,6 +11,7 @@ public class Parola {
 	public final int yf;
 	public final int punteggio;
 	public final String parola;
+	public static ArrayList<String> lista=new ArrayList<String>();
 	
 	static{
 		//le parole del dizionario nel file wordsita.txt vengono caricate in un array
@@ -19,7 +20,6 @@ public class Parola {
 		    
 		    while(wordn.hasNext()){
 		    	String s=wordn.nextLine();
-		    	ArrayList<String> lista= new ArrayList<String>();
 		    	lista.add(s);
 		    }
 		    wordn.close();
