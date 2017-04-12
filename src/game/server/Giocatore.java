@@ -23,11 +23,11 @@ public class Giocatore {
 			
 			ObjectOutputStream streamOne = new ObjectOutputStream(socket.getOutputStream());
 			
-			streamOne.writeObject("end");
-			streamOne.writeObject(motivo);
+			streamOne.writeUTF("end");
+			streamOne.writeUTF(motivo);
 			
 			streamOne.flush();
-			streamOne.close();
+			//streamOne.close();
 			
 			return true;
 		} catch(IOException e) {

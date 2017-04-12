@@ -51,8 +51,21 @@ public class GameClient extends Thread {
 			case "continue":
 				break;
 			case "end":
-				String motivo = objin.readUTF();
-				controller.alert("Partita terminata: " + motivo, AlertType.INFORMATION);
+				final Object lock = new Object();
+				final String motivo = objin.readUTF();
+				
+				
+				Platform.runLater(() -> {
+					controller.alert("Partita terminata: " + motivo, AlertType.INFORMATION);
+					try {
+						Thread.sleep(500);
+						synchronized(lock) {lock.notify();}
+					}
+					catch (InterruptedException e) { e.printStackTrace(); }
+				});
+				
+				try { synchronized(lock) {lock.wait();} }
+				catch(InterruptedException e) { e.printStackTrace(); }
 				
 				running = false;
 				server.close();
@@ -74,60 +87,36 @@ public class GameClient extends Thread {
 			controller.addRack(rack);
 			
 			// Allow player to play
-			List<Parola> words = null;
-			List<Parola> incorrectWords = null;
+			Azione action = controller.move();
 			
-			do {
-				if(incorrectWords != null && !incorrectWords.isEmpty()) {
-					String error;
-					
-					if(incorrectWords.size() == 1)
-						error = "La seguente parola non e' corretta: ";
-					else
-						error = "Le seguenti parole non sono corrette: ";
-					
-					for(Parola word : incorrectWords)
-						error += " " + word.toString();
-					
-					controller.alert(error, AlertType.WARNING);
-				}
-				
-				Azione action = controller.move();
-				
-				objout.writeObject(action);
-				objout.flush();
-				
-				switch(action) {
-				case ERRORE:
-					break;
-				case FINE_MOSSA:
-					// Send board
-					objout.writeObject(controller.getBoard());
-					objout.flush();
-					break;
-				case RESA:
-					break;
-				case CAMBIO:
-					objout.writeInt(controller.getExchangeRackCount());
-					objout.writeObject(controller.getExchangeRack());
-					objout.flush();
-					
-					controller.addRack((char[]) objin.readObject());
-					break;
-				default:
-					break;
-				
-				}
-			} while(!(incorrectWords = Scrabble.verificaParole(words)).isEmpty());
-			
-			// Send board
-			objout.writeObject(controller.getBoard());
+			objout.writeObject(action);
 			objout.flush();
 			
-			// Ask points
-			@SuppressWarnings("unchecked")
-			HashMap<String, Integer> points = (HashMap<String, Integer>) objin.readObject();
-			controller.addPoints(points);
+			switch(action) {
+			case ERRORE:
+				break;
+			case FINE_MOSSA:
+				// Send board
+				objout.writeObject(controller.getBoard());
+				objout.flush();
+				
+				// Ask points
+				@SuppressWarnings("unchecked")
+				HashMap<String, Integer> points = (HashMap<String, Integer>) objin.readObject();
+				controller.addPoints(points);
+				break;
+			case RESA:
+				break;
+			case CAMBIO:
+				objout.writeInt(controller.getExchangeRackCount());
+				objout.writeObject(controller.getExchangeRack());
+				objout.flush();
+				
+				controller.addRack((char[]) objin.readObject());
+				break;
+			default:
+				break;
+			}
 			
 			
 		} catch(ClassNotFoundException e) { GameController.exception(e); }

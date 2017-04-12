@@ -122,13 +122,11 @@ public class Scrabble {
 	public static List<Parola> verificaParole(List<Parola> words) {
 		ArrayList<Parola> incorrectWords = new ArrayList<>();
 		
-		for(int i =0; i<words.size();i++){
-			incorrectWords.add(words.get(i));
-		}
-		for(int i =0; i < dizionario.size();i++){
-			if(incorrectWords.get(i).parola == dizionario.get(i))
-				incorrectWords.remove(i);
-		}
+		incorrectWords.addAll(words);
+		
+		for(Parola p : incorrectWords)
+			if(dizionario.contains(p.parola))
+				incorrectWords.remove(p);
 		
 		return incorrectWords;
 	}

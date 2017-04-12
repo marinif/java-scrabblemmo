@@ -6,8 +6,10 @@ import java.io.StringWriter;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.ResourceBundle;
 
+import game.Parola;
 import game.Scrabble;
 import game.Scrabble.Azione;
 import game.Scrabble.Colore;
@@ -296,6 +298,8 @@ public class GameController implements Initializable {
 	private Azione azione;
 	
 	public Azione move() {
+		System.out.println("ciao!");
+		
 		azione = null;
 		
 		// Aggiorna plancia e leggio
@@ -334,10 +338,48 @@ public class GameController implements Initializable {
 				exchangeRack[i] = '\0';
 		});
 		
-		try {
-			// Attendi la mossa del giocatore
-			this.wait();
-		} catch(InterruptedException e) { e.printStackTrace(); }
+		
+		List<Parola> words = null;
+		List<Parola> incorrectWords = null;
+		do {
+			if(incorrectWords != null && !incorrectWords.isEmpty()) {
+				String error;
+				
+				if(incorrectWords.size() == 1)
+					error = "La seguente parola non e' corretta: ";
+				else
+					error = "Le seguenti parole non sono corrette: ";
+				
+				for(Parola word : incorrectWords)
+					error += " " + word.parola;
+				
+				final String error2 = error;
+				
+				final Object lock = new Object();
+				Platform.runLater(() -> {
+					alert(error2, AlertType.WARNING);
+					try {
+						Thread.sleep(500);
+						synchronized(lock) {lock.notify();}
+					}
+					catch (InterruptedException e) { e.printStackTrace(); }
+				});
+				
+				try { synchronized(lock) {
+					lock.wait();
+					Thread.sleep(500);
+					} }
+				catch(InterruptedException e) { e.printStackTrace(); }
+			}
+			
+			try {
+				// Attendi la mossa del giocatore
+				synchronized(lock) { lock.wait(); }
+			} catch(InterruptedException e) { e.printStackTrace(); }
+			
+			words = Scrabble.trovaParole(board);
+			
+		} while(!(incorrectWords = Scrabble.verificaParole(words)).isEmpty() && azione == Azione.FINE_MOSSA);
 		
 		// Disabilita l'interazione con la scacchiera
 		Platform.runLater(() -> {
@@ -348,7 +390,13 @@ public class GameController implements Initializable {
 			gameBoard.setDisable(true);
 			gameRack.setDisable(true);
 			blockingPane.setVisible(true);
+			
+			synchronized(lock) { lock.notify(); }
 		});
+		
+		try {
+			synchronized(lock) { lock.wait(); }
+		} catch(InterruptedException e) { e.printStackTrace(); }
 		
 		return azione;
 	}
@@ -476,7 +524,6 @@ public class GameController implements Initializable {
 		alert.setTitle("Attenzione!");
 		alert.setHeaderText(null);
 		alert.setContentText(message);
-
 		alert.showAndWait();
 	}
 
