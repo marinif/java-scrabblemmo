@@ -25,7 +25,7 @@ public class Scrabble {
 		    
 		    while(wordn.hasNext()){
 		    	String s=wordn.nextLine();
-		    	dizionario.add(s);
+		    	dizionario.add(s.toUpperCase());
 		    }
 		    wordn.close();
 		}catch(Exception e){
@@ -122,11 +122,9 @@ public class Scrabble {
 	public static List<Parola> verificaParole(List<Parola> words) {
 		ArrayList<Parola> incorrectWords = new ArrayList<>();
 		
-		incorrectWords.addAll(words);
-		
-		for(Parola p : incorrectWords)
-			if(dizionario.contains(p.parola))
-				incorrectWords.remove(p);
+		for(Parola p : words)
+			if(!dizionario.contains(p.parola))
+				incorrectWords.add(p);
 		
 		return incorrectWords;
 	}

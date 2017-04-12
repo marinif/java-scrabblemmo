@@ -305,10 +305,15 @@ public class GameController implements Initializable {
 		// Aggiorna plancia e leggio
 		Platform.runLater(() -> {
 			// Plancia
+			ArrayList<PiecePane> tmp = new ArrayList<>();
+			
 			for(PiecePane p : boardPieces) {
 				p.removeFromParent();
-				boardPieces.remove(p);
+				tmp.add(p);
 			}
+			boardPieces.removeAll(tmp);
+			tmp.clear();
+			
 			for(int x = 0; x < 15; x++)
 				for(int y = 0; y < 15; y++)
 					if(board[x][y] != '\0') {
@@ -320,8 +325,10 @@ public class GameController implements Initializable {
 			// Leggio
 			for(PiecePane p : rackPieces) {
 				p.removeFromParent();
-				rackPieces.remove(p);
+				tmp.add(p);
 			}
+			rackPieces.removeAll(tmp);
+			
 			for(int x = 0; x < 7; x++)
 				if(rack[x] != '\0') {
 					PiecePane p = newPiece(rack[x]);
