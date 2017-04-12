@@ -108,5 +108,5 @@ public class Scrabble {
 		ArrayList<Parola> incorrectWords = new ArrayList<>();
 		
 		return incorrectWords;
-	}	
+	}
 }
