@@ -19,8 +19,7 @@
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.text.Font?>
 
-
-<StackPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="740.0" prefWidth="1024.0" xmlns="http://javafx.com/javafx/8.0.65" xmlns:fx="http://javafx.com/fxml/1">
+<StackPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="740.0" prefWidth="1024.0" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1" fx:controller="game.client.GameController">
    <children>
       <BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="740.0" prefWidth="1024.0">
          <right>
@@ -64,8 +63,8 @@
          <top>
             <ToolBar prefHeight="40.0" prefWidth="200.0" BorderPane.alignment="CENTER">
                <items>
-                  <Button fx:id="btnRandom" mnemonicParsing="false" text="Fine turno" />
-                  <Button fx:id="btnFind" mnemonicParsing="false" text="Chiudi partita" />
+                  <Button fx:id="btnEndMove" mnemonicParsing="false" text="Fine turno" />
+                  <Button fx:id="btnSurrender" mnemonicParsing="false" text="Chiudi partita" />
                </items>
             </ToolBar>
          </top>
@@ -122,7 +121,7 @@
                               </GridPane>
                            </center>
                            <bottom>
-                              <GridPane fx:id="letterArray" gridLinesVisible="true" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="40.0" prefWidth="280.0" BorderPane.alignment="CENTER">
+                              <GridPane fx:id="gameRack" gridLinesVisible="true" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="40.0" prefWidth="280.0" BorderPane.alignment="CENTER">
                                  <columnConstraints>
                                     <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
                                     <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
@@ -147,7 +146,7 @@
             </AnchorPane>
          </center>
       </BorderPane>
-      <AnchorPane fx:id="blockingPane" prefHeight="200.0" prefWidth="200.0" visible="false">
+      <AnchorPane fx:id="blockingPane" prefHeight="200.0" prefWidth="200.0">
          <children>
             <Pane prefHeight="200.0" prefWidth="200.0" style="-fx-background-color: #333; -fx-opacity: 0.8;" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
             <Label alignment="CENTER" contentDisplay="CENTER" text="Attendi il tuo turno..." textAlignment="CENTER" textFill="WHITE" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
