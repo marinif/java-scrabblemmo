@@ -1,6 +1,7 @@
 package game.server;
 
 import java.io.IOException;
+import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -111,20 +112,36 @@ public abstract class MatchmakerServer {
 						final Giocatore a = players.remove(0);
 						final Giocatore b = players.remove(0);
 						
+						// Verifica se i giocatori sono ancora connessi
+						boolean connectedA = a.socket.isConnected();
+						boolean connectedB = b.socket.isConnected();
+						
+						if(!connectedA || !connectedB) {
+							if(connectedA) {
+								players.add(a);
+								System.out.println("Giocatore " + a.nome + " sconnesso");
+							} else if(connectedB) {
+								players.add(b);
+								System.out.println("Giocatore " + a.nome + " sconnesso");
+							}
+							
+							continue;
+						}
+						
 						Thread partita = new Thread() {
 							@Override
 							public void run() {
 								// Notifica i due giocatori
-								
-								
-								// Inizia gioco
-								System.out.println("Inizia il gioco! " + a.nome + " VS " + b.nome);
+								try {
+									PrintStream printA = new PrintStream(a.socket.getOutputStream());
+									PrintStream printB = new PrintStream(b.socket.getOutputStream());
+									
+									printA.println("auth:fatto!");
+									printB.println("auth:fatto!");
+								} catch(IOException e) { e.printStackTrace(); }
 								
 								GameServer game = new GameServer(a, b);
 								game.start();
-								
-								System.out.println("Partita terminata");
-								partite.remove(this);
 							}
 						};
 						
