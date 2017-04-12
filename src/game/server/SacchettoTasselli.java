@@ -77,4 +77,7 @@ public class SacchettoTasselli {
 	public void rimetti(char c) {
 		sacco.add(c);
 	}
+	public boolean isEmpty(){
+		return this.sacco.isEmpty();
+	}
 }
