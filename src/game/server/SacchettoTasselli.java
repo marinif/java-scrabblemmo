@@ -80,4 +80,8 @@ public class SacchettoTasselli {
 	public boolean isEmpty(){
 		return this.sacco.isEmpty();
 	}
+
+	public int rimasti() {
+		return sacco.size();
+	}
 }
