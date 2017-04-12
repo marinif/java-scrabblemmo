@@ -11,6 +11,7 @@ public class Scrabble {
 	
 	/** Colori delle caselle */
 	public static final Colore[][] coloriCaselle = new Colore[15][15];
+	private static char[][] caselle = new char[15][15];
 	
 	// Inizializza i colori
 	static {
@@ -69,10 +70,35 @@ public class Scrabble {
 	
 	/** @returns lista di parole trovate nella plancia
 	 * @param board plancia da controllare*/
-	public static List<Parola> trovaParole(char[][] board){
-		ArrayList<Parola> parole = new ArrayList<>();
-		
-		return parole;
+	public static ArrayList<Parola> trovaParole(char[][] board){
+		//lista di tutte le parole della griglia
+				ArrayList<Parola> parole= new ArrayList<Parola>();
+				
+				
+				
+				for(int i=0;i<15;i++)
+					for(int j=0;j<15;j++){
+						if(caselle[i][j] != '\0'){ //se il tassello non è vuoto controllo se la parola c'era in precedenza
+							//appena si incontra una casella non vuota si scorre sia a destra che in basso per leggere la parola
+							//parola verticale
+							if(caselle[i+1][j] != '\0' && caselle[i-1][j] == '\0'){
+								int k = i;
+								while(caselle[k][j] != '\0')
+									k++;
+								Parola p=new Parola(i,j,k,j,caselle);
+								parole.add(p);
+							}
+							//parola orizzontale
+							if(caselle[i][j+1] != '\0' && caselle[i][j-1] == '\0'){
+								int k = j;
+								while(caselle[i][k] != '\0')
+									k++;
+								Parola p=new Parola(i,j,i,k,caselle);
+								parole.add(p);
+							}
+						}
+					}
+				return parole;
 	}
 	
 	/** Verifica la correttezza delle parole 
@@ -82,5 +108,5 @@ public class Scrabble {
 		ArrayList<Parola> incorrectWords = new ArrayList<>();
 		
 		return incorrectWords;
-	}
+	}	
 }

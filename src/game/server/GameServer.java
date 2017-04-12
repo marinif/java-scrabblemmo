@@ -48,15 +48,22 @@ public class GameServer extends Thread {
 		// Loop gioco
 		try {
 			Giocatore current = playerOne;
+			int contTurni=0;
+			/*
+			//conto quanti turni vengono fatti senza mettere parole sulla plancia
+			if(passa o cambia)
+				contTurni++;
+			else contTurni=0;
+			//condizioni per la fine della partita
+			if(bag.isEmpty() == true || contTurni > 2) {
+				// Invia messaggio fine a entrambi i giocatori
+				
+				// Chiudi le connessioni
+			}
+			*/
 			while(running) {
 				loop(current);
 				
-				//TODO: Trovare le condizioni per la fine della partita
-				if(false) {
-					// Invia messaggio fine a entrambi i giocatori
-					
-					// Chiudi le connessioni
-				}
 				
 				// Swap players
 				current = (current == playerOne ? playerTwo : playerOne);
