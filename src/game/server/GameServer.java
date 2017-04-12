@@ -52,17 +52,27 @@ public class GameServer extends Thread {
 		try {
 			Giocatore current = playerOne;
 			
-			//conto quanti turni vengono fatti senza mettere parole sulla plancia
-			//condizioni per la fine della partita
-			if(bag.isEmpty() == true || nTurniVuoti > 5) {	//manca la condizione sul tempo scaduto
-				// Invia messaggio fine a entrambi i giocatori con i punteggi e il vincitore
-				
-				// Chiudi le connessioni
-			}
-			
 			while(running) {
 				loop(current);
 				
+				//conto quanti turni vengono fatti senza mettere parole sulla plancia
+				//condizioni per la fine della partita
+				if(bag.isEmpty() || nTurniVuoti == 6) {	//manca la condizione sul tempo scaduto
+					// Invia messaggio fine a entrambi i giocatori con i punteggi e il vincitore
+					Giocatore vincitore = (playerOne.punteggio > playerTwo.punteggio ? playerOne :
+											(playerOne.punteggio == playerTwo.punteggio ? null : playerTwo)
+											);
+					
+					String messaggio;
+					if(vincitore == null)
+						messaggio = "Fine partita, pareggio!";
+					else
+						messaggio = "Fine partita, ha vinto '" + vincitore.nome + "' con " + vincitore.punteggio + " punti";
+					
+					// Chiudi le connessioni
+					endMatch(messaggio);
+					running = false;
+				}
 				
 				// Swap players
 				current = (current == playerOne ? playerTwo : playerOne);
