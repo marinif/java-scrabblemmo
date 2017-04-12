@@ -3,6 +3,7 @@ package game.server;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.PrintStream;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -32,8 +33,6 @@ public class GameServer extends Thread {
 		playerOne = a;
 		playerTwo = b;
 		
-		// Wait for playersß
-		
 		running = true;
 	}
 	
@@ -42,6 +41,11 @@ public class GameServer extends Thread {
 	public void run() {
 		// Come per regolamento, viene aggiunto un tassello iniziale
 		board[7][7] = bag.pesca();
+		
+		// Inizia gioco
+		System.out.println("Inizia il gioco! " + playerOne.nome + " VS " + playerTwo.nome);
+		
+		// Loop gioco
 		try {
 			Giocatore current = playerOne;
 			while(running) {
@@ -57,7 +61,13 @@ public class GameServer extends Thread {
 				// Swap players
 				current = (current == playerOne ? playerTwo : playerOne);
 			}
-		} catch(Exception e) { e.printStackTrace(); }
+		} catch(IOException e) {
+			e.printStackTrace();
+			
+			System.out.println("Disconnessione giocatori in corso...");
+			playerOne.disconnetti(e.getMessage());
+			playerTwo.disconnetti(e.getMessage());
+		}
 	}
 	
 	public void loop(Giocatore p) throws IOException {
@@ -155,11 +165,7 @@ public class GameServer extends Thread {
 	private void endMatch(String reason) {
 		running = false;
 		
-		try {
-			playerOne.disconnetti(reason);
-			playerTwo.disconnetti(reason);
-		}
-		catch(IOException e) { e.printStackTrace(); }
-		
+		playerOne.disconnetti(reason);
+		playerTwo.disconnetti(reason);
 	}
 }

@@ -18,15 +18,22 @@ public class Giocatore {
 		
 	}
 	
-	public void disconnetti(String motivo) throws IOException {
-		if(!socket.isConnected()) return;
-		
-		ObjectOutputStream streamOne = new ObjectOutputStream(socket.getOutputStream());
-		
-		streamOne.writeObject("end");
-		streamOne.writeObject(motivo);
-		
-		streamOne.flush();
-		streamOne.close();
+	public boolean disconnetti(String motivo) {
+		try {
+			if(!socket.isConnected()) return true;
+			
+			ObjectOutputStream streamOne = new ObjectOutputStream(socket.getOutputStream());
+			
+			streamOne.writeObject("end");
+			streamOne.writeObject(motivo);
+			
+			streamOne.flush();
+			streamOne.close();
+			
+			return true;
+		} catch(IOException e) {
+			e.printStackTrace();
+			return false;
+		}
 	}
 }
