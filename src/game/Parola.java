@@ -11,6 +11,7 @@ public class Parola {
 	public final int yf;
 	private int punteggio;
 	public final String parola;
+	public static ArrayList<String> lista;
 	
 	static{
 		//le parole del dizionario nel file wordsita.txt vengono caricate in un array
@@ -19,7 +20,7 @@ public class Parola {
 		    
 		    while(wordn.hasNext()){
 		    	String s=wordn.nextLine();
-		    	ArrayList<String> lista= new ArrayList<String>();
+		    	lista= new ArrayList<String>();
 		    	lista.add(s);
 		    }
 		    wordn.close();
@@ -29,7 +30,7 @@ public class Parola {
 	    
 	}
 	
-	public Parola(int xi,int yi,int xf,int yf,Scrabble s){
+	public Parola(int xi,int yi,int xf,int yf,char[][] s){
 		this.xi=xi;
 		this.yi=yi;
 		this.xf=xf;
@@ -39,8 +40,10 @@ public class Parola {
 		if(xi==xf){
 			int tmp=yi;
 			while(tmp<yf){	//scorrendo sui tasselli
-				this.punteggio += s.getTassello(xi,tmp).getPunteggio();	//si calcola il punteggio
-				temporanea += s.getTassello(xi,tmp).lettera; //e si concatenano le lettere per formare la parola
+				//this.punteggio += s.getTassello(xi,tmp).getPunteggio();	//si calcola il punteggio
+				//temporanea += s.getTassello(xi,tmp); //e si concatenano le lettere per formare la parola
+				this.punteggio += Scrabble.getPunteggio(s[xi][tmp]);	//si calcola il punteggio
+				temporanea += s[xi][tmp];
 				tmp++;
 			}
 		}
@@ -48,8 +51,8 @@ public class Parola {
 		else if(yi==yf){
 			int tmp=xi;
 			while(tmp<xf){ //scorrendo sui tasselli
-				punteggio += s.getTassello(tmp,yi).getPunteggio(); //si calcola il punteggio
-				temporanea += s.getTassello(tmp,yi).lettera; //e si concatenano le lettere per formare la parola
+				this.punteggio += Scrabble.getPunteggio(s[tmp][yi]); //si calcola il punteggio
+				temporanea += s[tmp][yi]; //e si concatenano le lettere per formare la parola
 				tmp++;
 			}
 		}
