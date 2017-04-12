@@ -2,8 +2,7 @@ package game.client.gui;
 
 import java.io.File;
 
-import game.Tassello;
-import javafx.scene.Node;
+import game.Scrabble;
 import javafx.scene.Parent;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
@@ -14,16 +13,13 @@ import javafx.scene.text.Font;
 public class PiecePane extends StackPane {
 	private static Image bgImage;
 	
-	public final Tassello piece;
-	
 	static {
 		File f = new File("res/piece.png");
 		System.out.println(f.getAbsolutePath());
 		bgImage = new Image(f.toURI().toString());
 	}
 	
-	public PiecePane(Tassello t) {
-		piece = t;
+	public PiecePane(char lettera) {
 		
 		try {
 		ImageView bg = new ImageView(bgImage);
@@ -31,12 +27,12 @@ public class PiecePane extends StackPane {
 		bg.setFitHeight(40);
 		this.getChildren().add(bg);
 		
-		Label letterLabel = new Label(Character.toString(t.lettera));
+		Label letterLabel = new Label(Character.toString(lettera));
 		letterLabel.setFont(Font.font("System", 20));
 		this.getChildren().add(letterLabel);
 		
 		AnchorPane pointPane = new AnchorPane();
-		Label pointLabel = new Label(Integer.toString(t.getPunteggio()));
+		Label pointLabel = new Label(Integer.toString(Scrabble.getPunteggio(lettera)));
 		pointLabel.setFont(Font.font("System", 10));
 		pointPane.getChildren().add(pointLabel);
 		AnchorPane.setRightAnchor(pointLabel, 4.0);

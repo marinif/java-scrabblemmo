@@ -1,4 +1,4 @@
-package game;
+package game.client;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -7,17 +7,20 @@ import java.net.Socket;
 import java.util.HashMap;
 import java.util.List;
 
+import game.Parola;
+import game.Scrabble;
 import game.Scrabble.Azione;
 import javafx.scene.control.Alert.AlertType;
 
-public class GameClient {
+public class GameClient extends Thread {
 	Socket server;
 	boolean running;
 	
 	GameController controller;
 	
-	public GameClient(Socket server) {
+	public GameClient(Socket server, GameController controller) {
 		this.server = server;
+		this.controller = controller;
 		
 		// Say hello to server
 	}
@@ -78,11 +81,13 @@ public class GameClient {
 					break;
 				case RESA:
 					break;
+				case CAMBIO:
+					break;
 				default:
 					break;
 				
 				}
-			} while(!(incorrectWords = Scrabble.checkWords(words)).isEmpty());
+			} while(!(incorrectWords = Scrabble.verificaParole(words)).isEmpty());
 			
 			// Send board
 			objout.writeObject(controller.getBoard());
@@ -93,6 +98,6 @@ public class GameClient {
 			controller.addPoints(points);
 			
 			
-		} catch(ClassNotFoundException e) { controller.exception(e); }
+		} catch(ClassNotFoundException e) { GameController.exception(e); }
 	}
 }

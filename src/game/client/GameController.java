@@ -1,11 +1,15 @@
-package game;
+package game.client;
 
 import java.awt.Button;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.util.ArrayList;
 import java.util.HashMap;
 
+import game.Scrabble;
 import game.Scrabble.Azione;
+import game.client.gui.PiecePane;
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
@@ -17,12 +21,15 @@ import javafx.scene.layout.Priority;
 public class GameController {
 	
 	/* Plancia */
-	@FXML GridPane gameBoard;
 	char[][] board = new char[15][15];
+	boolean[][] boardMove = new boolean[15][15];
+	@FXML GridPane gameBoard;
+	ArrayList<PiecePane> boardPieces = new ArrayList<>(15*15);
 	
 	/* Leggio */
-	@FXML GridPane gameRack;
 	char[] rack = new char[7];
+	@FXML GridPane gameRack;
+	ArrayList<PiecePane> rackPieces = new ArrayList<>(7);
 	
 	/* Bottoni */
 	@FXML Button btnEndMove;
@@ -32,13 +39,38 @@ public class GameController {
 	@FXML Label labelPoints;
 	
 	public GameController() {
-		
+		GameClient client = new GameClient(MainApplication.serverSocket, this);
+		client.start();
 	}
 	
 	public Azione move() {
-		// Abilita l'interazione con la scacchiera
-		gameBoard.setDisable(false);
-		gameRack.setDisable(false);
+		// Aggiorna plancia e leggio
+		Platform.runLater(() -> {
+			// Plancia
+			for(PiecePane p : boardPieces)
+				p.removeFromParent();
+			for(int x = 0; x < 15; x++)
+				for(int y = 0; y < 15; y++)
+					if(board[x][y] != '\0') {
+						PiecePane p = new PiecePane(board[x][y]);
+						gameBoard.add(p, x, y);
+						boardPieces.add(p);
+					}
+			
+			// Leggio
+			for(PiecePane p : rackPieces)
+				p.removeFromParent();
+			for(int x = 0; x < 7; x++)
+				if(rack[x] != '\0') {
+					PiecePane p = new PiecePane(rack[x]);
+					gameRack.add(p, x, 0);
+					rackPieces.add(p);
+				}
+			
+			// Abilita l'interazione con la scacchiera
+			gameBoard.setDisable(false);
+			gameRack.setDisable(false);
+		});
 		
 		try {
 			// Attendi la mossa del giocatore
@@ -46,19 +78,27 @@ public class GameController {
 		} catch(InterruptedException e) { e.printStackTrace(); }
 		
 		// Disabilita l'interazione con la scacchiera
-		gameBoard.setDisable(true);
-		gameRack.setDisable(true);
+		Platform.runLater(() -> {
+			gameBoard.setDisable(true);
+			gameRack.setDisable(true);
+		});
+		
 		return null;
 	}
 
 	/*
 	 *  Gestione plancia
 	 */
-	public void setBoard(char[][] board) {
+	protected void setBoard(char[][] board) {
 		this.board = board;
+		
+		// Imposta permessi spostamento
+		for(int x = 0; x < 15; x++)
+			for(int y = 0; y < 15; y++)
+				boardMove[x][y] = (board[x][y] == '\0');
 	}
 
-	public Object getBoard() {
+	protected char[][] getBoard() {
 		return board;
 	}
 	
@@ -69,8 +109,12 @@ public class GameController {
 	public void addRack(char[] rack) {
 		int c = 0;
 		for(int i = 0; i < 7; i++)
-			if(this.rack[i] == '\0')
-				this.rack[i] = rack[c++];
+			if(this.rack[i] == '\0') {
+				char lettera = rack[c++];
+				
+				
+				this.rack[i] = lettera;
+			}
 	}
 
 	public int getRackLength() {
