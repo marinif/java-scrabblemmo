@@ -1,94 +1,144 @@
-package game.client;
+package game;
 
-import java.net.URL;
-import java.util.ResourceBundle;
+import java.awt.Button;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.util.HashMap;
 
-import game.Tassello;
-import game.client.gui.BoardController;
-import game.client.gui.PiecePane;
-import game.client.gui.Position;
-import game.Parola;
-import game.Scrabble;
+import game.Scrabble.Azione;
 import javafx.fxml.FXML;
-import javafx.fxml.Initializable;
-import javafx.scene.layout.AnchorPane;
-import javafx.scene.layout.GridPane;
-import javafx.scene.control.Button;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Label;
-import javafx.scene.input.TransferMode;
+import javafx.scene.control.TextArea;
+import javafx.scene.layout.GridPane;
+import javafx.scene.layout.Priority;
 
-public class GameController implements Initializable {
-	// Elementi JavaFX
+public class GameController {
+	
+	/* Plancia */
 	@FXML GridPane gameBoard;
-	@FXML GridPane letterArray;
+	char[][] board = new char[15][15];
 	
-	@FXML Button btnRandom;
-	@FXML Button btnFind;
+	/* Leggio */
+	@FXML GridPane gameRack;
+	char[] rack = new char[7];
 	
-	@FXML AnchorPane trashBin;
-	@FXML Label wordList;
+	/* Bottoni */
+	@FXML Button btnEndMove;
+	@FXML Button btnSurrender;
 	
-	// Meccaniche di gioco
-	Scrabble game;
-	BoardController board;
-
-	@Override
-	public void initialize(URL location, ResourceBundle resources) {
-		System.out.println("ciao");
+	/* Elenco parole */
+	@FXML Label labelPoints;
+	
+	public GameController() {
 		
-		// Imposta la griglia
-		game = new Scrabble(new GiocatoreLocale("lul1"), new GiocatoreLocale("lul2"));
-		board = new BoardController(game, gameBoard, letterArray);
-		
-		
-		// DEBUG (commentare via in production)
-		Tassello piece = new Tassello('T');
-		board.add(piece, 4, 4);
-		
-		btnRandom.setOnMouseClicked(e -> {
-			board.addMano(game.pescaTassello());
-			e.consume();
-		});
-		
-		btnFind.setOnMouseClicked(e -> {
-			String words = "";
-			
-			for(Parola p : game.trovaParole())
-				words += p + "\n";
-			
-			wordList.setText(words);
-		});
-		
-		trashBin.setOnDragOver(e -> {
-			e.acceptTransferModes(TransferMode.MOVE);
-            e.consume();
-		});
-		
-		trashBin.setOnDragDropped(e -> {
-			e.acceptTransferModes(TransferMode.MOVE);
-
-			// Preleva posizione sorgente
-			String pos = e.getDragboard().getString();
-			char origin = pos.charAt(0);
-			int x1 = Integer.parseInt(pos.substring(2, pos.indexOf(',')));
-			int y1 = Integer.parseInt(pos.substring(pos.indexOf(',')+1, pos.length()));
-			
-			try {
-				if(origin == 'g') {
-					game.riciclaTassello(board.remove(x1, y1));
-				}
-				else {
-					// Ottieni e rimuovi il tassello dal leggio
-					PiecePane pp = board.handPieces[x1];
-					board.handPieces[x1] = null;
-					pp.removeFromParent();
-					
-					game.riciclaTassello(pp.piece);
-				}
-				
-				e.setDropCompleted(true);
-				e.consume();
-			} catch(Exception e1) { e1.printStackTrace(); };
-		});
 	}
+	
+	public Azione move() {
+		// Abilita l'interazione con la scacchiera
+		gameBoard.setDisable(false);
+		gameRack.setDisable(false);
+		
+		try {
+			// Attendi la mossa del giocatore
+			this.wait();
+		} catch(InterruptedException e) { e.printStackTrace(); }
+		
+		// Disabilita l'interazione con la scacchiera
+		gameBoard.setDisable(true);
+		gameRack.setDisable(true);
+		return null;
+	}
+
+	/*
+	 *  Gestione plancia
+	 */
+	public void setBoard(char[][] board) {
+		this.board = board;
+	}
+
+	public Object getBoard() {
+		return board;
+	}
+	
+	/*
+	 * 	Gestione leggio
+	 */
+
+	public void addRack(char[] rack) {
+		int c = 0;
+		for(int i = 0; i < 7; i++)
+			if(this.rack[i] == '\0')
+				this.rack[i] = rack[c++];
+	}
+
+	public int getRackLength() {
+		int n = 0;
+		
+		for(int i = 0; i < 7; i++)
+			if(this.rack[i] != '\0')
+				n++;
+				
+		return n;
+	}
+	
+	
+	/*
+	 * 	Interfacciamento GUI
+	 */
+	
+	public void addPoints(HashMap<String, Integer> points) {
+		String total = labelPoints.getText();
+		
+		for(String word : points.keySet())
+			total += "\n" + word + " - " + points.get(word) + " pt.";
+		
+		labelPoints.setText(total);
+	}
+
+	public void alert(String message, AlertType type) {
+		Alert alert = new Alert(type);
+		alert.setTitle("Attenzione!");
+		alert.setHeaderText(null);
+		alert.setContentText(message);
+
+		alert.showAndWait();
+	}
+
+	public static void exception(Exception ex) {
+		Alert alert = new Alert(AlertType.ERROR);
+		alert.setTitle("Java exception");
+		alert.setHeaderText(ex.getClass().getSimpleName());
+		alert.setContentText(ex.getMessage());
+
+		// Create expandable Exception.
+		StringWriter sw = new StringWriter();
+		PrintWriter pw = new PrintWriter(sw);
+		ex.printStackTrace(pw);
+		String exceptionText = sw.toString();
+
+		Label label = new Label("Stack trace:");
+
+		TextArea textArea = new TextArea(exceptionText);
+		textArea.setEditable(false);
+		textArea.setWrapText(true);
+
+		textArea.setMaxWidth(Double.MAX_VALUE);
+		textArea.setMaxHeight(Double.MAX_VALUE);
+		GridPane.setVgrow(textArea, Priority.ALWAYS);
+		GridPane.setHgrow(textArea, Priority.ALWAYS);
+
+		GridPane expContent = new GridPane();
+		expContent.setMaxWidth(Double.MAX_VALUE);
+		expContent.add(label, 0, 0);
+		expContent.add(textArea, 0, 1);
+
+		// Set expandable Exception into the dialog pane.
+		alert.getDialogPane().setExpandableContent(expContent);
+
+		alert.showAndWait();
+	}
+	
+
 }
