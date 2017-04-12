@@ -10,6 +10,7 @@ import java.util.List;
 import game.Parola;
 import game.Scrabble;
 import game.Scrabble.Azione;
+import javafx.application.Platform;
 import javafx.scene.control.Alert.AlertType;
 
 public class GameClient extends Thread {
@@ -43,6 +44,22 @@ public class GameClient extends Thread {
 		ObjectInputStream objin = new ObjectInputStream(server.getInputStream());
 		
 		try {
+			// Receive status
+			String status = objin.readUTF();
+			
+			switch(status) {
+			case "continue":
+				break;
+			case "end":
+				String motivo = objin.readUTF();
+				controller.alert("Partita terminata: " + motivo, AlertType.INFORMATION);
+				
+				running = false;
+				server.close();
+				Platform.exit();
+				return;
+			}
+			
 			// Receive board
 			char[][] board = (char[][]) objin.readObject();
 			controller.setBoard(board);
@@ -77,14 +94,25 @@ public class GameClient extends Thread {
 				
 				Azione action = controller.move();
 				
+				objout.writeObject(action);
+				objout.flush();
+				
 				switch(action) {
 				case ERRORE:
 					break;
 				case FINE_MOSSA:
+					// Send board
+					objout.writeObject(controller.getBoard());
+					objout.flush();
 					break;
 				case RESA:
 					break;
 				case CAMBIO:
+					objout.writeInt(controller.getExchangeRackCount());
+					objout.writeObject(controller.getExchangeRack());
+					objout.flush();
+					
+					controller.addRack((char[]) objin.readObject());
 					break;
 				default:
 					break;

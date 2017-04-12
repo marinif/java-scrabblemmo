@@ -85,6 +85,8 @@ public class GameServer extends Thread {
 		System.out.print(p.nome + ": connessione ObjectStream aperta");
 		
 		try {
+			objout.writeUTF("continue");
+			
 			// Synchronize board
 			objout.writeObject(board);
 			objout.flush();
@@ -105,6 +107,10 @@ public class GameServer extends Thread {
 			Azione action = (Azione) objin.readObject();
 			String endReason = "";
 			
+			char[][] newBoard;
+			List<Parola> newWords; 
+			List<Parola> playerWords;
+			
 			switch(action) {
 			case ERRORE:
 				endReason = "Il giocatore '" + p.nome + "' ha riscontrato un errore";
@@ -115,6 +121,7 @@ public class GameServer extends Thread {
 				
 			case CAMBIO:
 				nTurniVuoti++; //conto i turni che vanno a vuoto
+				
 				n = objin.readInt();
 				if(n == 7)
 					if(!p.cambioSecco)
@@ -127,6 +134,7 @@ public class GameServer extends Thread {
 				for(char c : rack)
 					bag.rimetti(c);
 				// Pescane altri
+				n = Math.min(n, bag.rimasti());
 				rack = new char[n];
 				for(int i = 0; i < n; i++)
 					rack[i] = bag.pesca();
@@ -135,42 +143,38 @@ public class GameServer extends Thread {
 				objout.flush();
 				break;
 			case FINE_MOSSA:
-				nTurniVuoti=0;	//si riazzerano i turni che vanno a vuoto
-				break;
+				newBoard = (char[][])objin.readObject();
+				newWords = Scrabble.trovaParole(newBoard);
+				playerWords= new ArrayList<>();
 				
-			case PASSO:
-				nTurniVuoti++; 	//conto i turni che vanno a vuoto
+				if(playerWords.isEmpty())
+					nTurniVuoti++; 	//conto i turni che vanno a vuoto
+				else
+					nTurniVuoti=0;	//si riazzerano i turni che vanno a vuoto
+				
+				for(Parola word : newWords)
+					if(!words.contains(word)) {
+						words.add(word);
+						playerWords.add(word);
+					}
+				
+				// Swap boards
+				board = newBoard;
+				
+				// Send points
+				HashMap<String, Integer> points = new HashMap<>();
+				for(Parola word : playerWords) {
+					points.put(word.toString(), word.punteggio);
+					p.punteggio += word.punteggio;
+				}
+				
+				objout.writeObject(points);
+				objout.flush();
 				break;
 			default:
 				//objout.writeObject("continue");
 				break;
-				}
-			
-			// Ask board
-			char[][] newBoard = (char[][])objin.readObject();
-			
-			// Find words
-			List<Parola> newWords = Scrabble.trovaParole(newBoard);
-			List<Parola> playerWords = new ArrayList<>();
-			
-			for(Parola word : newWords)
-				if(!words.contains(word)) {
-					words.add(word);
-					playerWords.add(word);
-				}
-			
-			// Swap boards
-			board = newBoard;
-			
-			// Send points
-			HashMap<String, Integer> points = new HashMap<>();
-			for(Parola word : playerWords) {
-				points.put(word.toString(), word.punteggio);
-				p.punteggio += word.punteggio;
 			}
-			
-			objout.writeObject(points);
-			objout.flush();
 		}
 		catch(ClassNotFoundException e1) { e1.printStackTrace(); }
 	}

@@ -34,7 +34,7 @@ public class Scrabble {
 					coloriCaselle[x][y] = Colore.VERDE;
 	}
 	
-	public static enum Azione { INIZIO_MOSSA, FINE_MOSSA, PASSO, CAMBIO, RESA, FINE, ERRORE };
+	public static enum Azione { INIZIO_MOSSA, FINE_MOSSA, CAMBIO, RESA, FINE, ERRORE };
 
 	/*
 	 *	CALCOLO PUNTEGGIO
@@ -73,8 +73,6 @@ public class Scrabble {
 	public static ArrayList<Parola> trovaParole(char[][] board){
 		//lista di tutte le parole della griglia
 				ArrayList<Parola> parole= new ArrayList<Parola>();
-				
-				
 				
 				for(int i=0;i<15;i++)
 					for(int j=0;j<15;j++){

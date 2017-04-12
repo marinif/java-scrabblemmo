@@ -31,6 +31,7 @@ import javafx.scene.layout.Pane;
 import javafx.scene.layout.Priority;
 
 public class GameController implements Initializable {
+	private final Object lock = new Object();
 	
 	@FXML AnchorPane blockingPane;
 	
@@ -44,6 +45,11 @@ public class GameController implements Initializable {
 	char[] rack = new char[7];
 	@FXML GridPane gameRack;
 	ArrayList<PiecePane> rackPieces = new ArrayList<>(7);
+	
+	/* Area scambio */
+	char[] exchangeRack = new char[7];
+	@FXML AnchorPane exchangeArea;
+	ArrayList<PiecePane> exchangeRackPieces = new ArrayList<>(7);
 	
 	/* Bottoni */
 	@FXML Button btnEndMove;
@@ -136,9 +142,13 @@ public class GameController implements Initializable {
 					c = board[x1][y1];
 					board[x1][y1] = '\0';
 					board[x2][y2] = c;
-				} else {
+				} else if(origin == 'r') {
 					c = rack[x1];
 					rack[x1] = '\0';
+					board[x2][y2] = c;
+				} else {
+					c = exchangeRack[x1];
+					exchangeRack[x1] = '\0';
 					board[x2][y2] = c;
 				}
 				
@@ -182,10 +192,67 @@ public class GameController implements Initializable {
 					if(origin == 'b') {
 						c = board[x1][y1];
 						board[x1][y1] = '\0';
-					} else {
+						rack[x2] = c;
+					} else if(origin == 'r') {
 						c = rack[x1];
 						rack[x1] = '\0';
 						rack[x2] = c;
+					} else {
+						c = exchangeRack[x1];
+						exchangeRack[x1] = '\0';
+						rack[x2] = c;
+					}
+					
+					PiecePane pp = newPiece(c);
+					rackPieces.add(pp);
+					gameRack.add(pp, x2, 0);
+					
+					e.setDropCompleted(true);
+					e.consume();
+				} else {
+					e.setDropCompleted(true);
+					e.consume();
+				}
+			} catch(Exception e1) { e1.printStackTrace(); };
+		});
+		
+		// Area di scambio
+		exchangeArea.setOnDragOver(e -> {
+            e.acceptTransferModes(TransferMode.MOVE);
+            e.consume();
+        });
+		
+		exchangeArea.setOnDragDropped(e -> {
+			e.acceptTransferModes(TransferMode.MOVE);
+
+			// Preleva posizione sorgente
+			String pos = e.getDragboard().getString();
+			char origin = pos.charAt(0);
+			int x1 = Integer.parseInt(pos.substring(2, pos.indexOf(',')));
+			int y1 = Integer.parseInt(pos.substring(pos.indexOf(',')+1, pos.length()));
+			
+			// Calcola posizione destinazione
+			Position p = new Position(e, gameRack);
+			int x2 = (int)Math.floor(p.x / 40);
+			
+			System.out.println(x1 + "," + y1 + " -> " +x2);
+			
+			try {
+				if(rack[x2] == '\0') {
+					char c;
+					
+					if(origin == 'b') {
+						c = board[x1][y1];
+						board[x1][y1] = '\0';
+						exchangeRack[x2] = c;
+					} else if(origin == 'r') {
+						c = rack[x1];
+						rack[x1] = '\0';
+						exchangeRack[x2] = c;
+					} else {
+						c = exchangeRack[x1];
+						exchangeRack[x1] = '\0';
+						exchangeRack[x2] = c;
 					}
 					
 					PiecePane pp = newPiece(c);
@@ -226,7 +293,11 @@ public class GameController implements Initializable {
 		client.start();
 	}
 	
+	private Azione azione;
+	
 	public Azione move() {
+		azione = null;
+		
 		// Aggiorna plancia e leggio
 		Platform.runLater(() -> {
 			// Plancia
@@ -258,6 +329,9 @@ public class GameController implements Initializable {
 			blockingPane.setVisible(false);
 			gameBoard.setDisable(false);
 			gameRack.setDisable(false);
+			// Svuota l'array di scambio
+			for(int i = 0; i < 7; i++)
+				exchangeRack[i] = '\0';
 		});
 		
 		try {
@@ -267,12 +341,16 @@ public class GameController implements Initializable {
 		
 		// Disabilita l'interazione con la scacchiera
 		Platform.runLater(() -> {
+			// Svuota l'area di scambio
+			for(PiecePane p : exchangeRackPieces)
+				p.removeFromParent();
+			
 			gameBoard.setDisable(true);
 			gameRack.setDisable(true);
 			blockingPane.setVisible(true);
 		});
 		
-		return null;
+		return azione;
 	}
 
 	/*
@@ -316,6 +394,13 @@ public class GameController implements Initializable {
 		return n;
 	}
 	
+	public char[] getExchangeRack() {
+		return exchangeRack;
+	}
+	
+	public int getExchangeRackCount() {
+		return exchangeRackPieces.size();
+	}
 	
 	/*
 	 * 	Interfacciamento GUI
