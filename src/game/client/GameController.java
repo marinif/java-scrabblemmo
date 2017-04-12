@@ -12,13 +12,19 @@ import game.Scrabble;
 import game.Scrabble.Azione;
 import game.Scrabble.Colore;
 import game.client.gui.PiecePane;
+import game.client.gui.Position;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.scene.SnapshotParameters;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
+import javafx.scene.image.WritableImage;
+import javafx.scene.input.ClipboardContent;
+import javafx.scene.input.Dragboard;
+import javafx.scene.input.TransferMode;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
@@ -43,11 +49,16 @@ public class GameController implements Initializable {
 	@FXML Button btnEndMove;
 	@FXML Button btnSurrender;
 	
+	@FXML Button btnExchange;
+	@FXML Button btnExchangeAll;
+	
 	/* Elenco parole */
+	@FXML Label wordList;
 	@FXML Label labelPoints;
 	
 	@Override
 	public void initialize(URL fxmlFileLocation, ResourceBundle resources) {
+		// Colori caselle sulla plancia
 		for(int x = 0; x < 15; x++)
 			for(int y = 0; y < 15; y++) {
 				Pane pane = new AnchorPane();
@@ -72,6 +83,142 @@ public class GameController implements Initializable {
 				
 			}
 		
+		// Colori caselle sul leggio
+		for(int x = 0; x < 7; x++) {
+			Pane pane = new AnchorPane();
+			pane.setStyle(
+					"-fx-background-color: #d8c991;" +
+					"-fx-border-style: solid outside; -fx-border-width: 1; -fx-border-color: #222;"
+			);
+			
+			gameRack.add(pane, x, 0);
+			pane.applyCss();
+			pane.setOpacity(0.8);
+			
+			pane.setOnDragEntered(e -> {
+				pane.setOpacity(1.0);
+				e.consume();
+			});
+			
+			pane.setOnDragExited(e -> {
+				pane.setOpacity(0.8);
+				e.consume();
+			});
+		}
+		
+		
+		// Listener eventi plancia
+		gameBoard.setOnDragOver(e -> {
+            e.acceptTransferModes(TransferMode.MOVE);
+            e.consume();
+        });  
+		
+		gameBoard.setOnDragDropped(e -> {
+			e.acceptTransferModes(TransferMode.MOVE);
+
+			// Preleva posizione sorgente
+			String pos = e.getDragboard().getString();
+			char origin = pos.charAt(0);
+			int x1 = Integer.parseInt(pos.substring(2, pos.indexOf(',')));
+			int y1 = Integer.parseInt(pos.substring(pos.indexOf(',')+1, pos.length()));
+			
+			// Calcola posizione destinazione
+			Position p = new Position(e, gameBoard);
+			int x2 = (int)Math.floor(p.x / 40);
+			int y2 = (int)Math.floor(p.y / 40);
+			
+			System.out.println(x1 + "," + y1 + " -> " +x2 + "," + y2);
+			
+			if(board[x2][y2] == '\0' && boardMove[x2][y2]) {
+				char c;
+				
+				if(origin == 'b') {
+					c = board[x1][y1];
+					board[x1][y1] = '\0';
+					board[x2][y2] = c;
+				} else {
+					c = rack[x1];
+					rack[x1] = '\0';
+					board[x2][y2] = c;
+				}
+				
+				PiecePane pp = newPiece(c);
+				boardPieces.add(pp);
+				gameBoard.add(pp, x2, y2);
+				
+				e.setDropCompleted(true);
+				e.consume();
+			} else {
+				e.setDropCompleted(true);
+				e.consume();
+			}
+		});
+		
+		// Listener per il leggio
+		gameRack.setOnDragOver(e -> {
+            e.acceptTransferModes(TransferMode.MOVE);
+            e.consume();
+        });
+		
+		gameRack.setOnDragDropped(e -> {
+			e.acceptTransferModes(TransferMode.MOVE);
+
+			// Preleva posizione sorgente
+			String pos = e.getDragboard().getString();
+			char origin = pos.charAt(0);
+			int x1 = Integer.parseInt(pos.substring(2, pos.indexOf(',')));
+			int y1 = Integer.parseInt(pos.substring(pos.indexOf(',')+1, pos.length()));
+			
+			// Calcola posizione destinazione
+			Position p = new Position(e, gameRack);
+			int x2 = (int)Math.floor(p.x / 40);
+			
+			System.out.println(x1 + "," + y1 + " -> " +x2);
+			
+			try {
+				if(rack[x2] == '\0') {
+					char c;
+					
+					if(origin == 'b') {
+						c = board[x1][y1];
+						board[x1][y1] = '\0';
+					} else {
+						c = rack[x1];
+						rack[x1] = '\0';
+						rack[x2] = c;
+					}
+					
+					PiecePane pp = newPiece(c);
+					rackPieces.add(pp);
+					gameRack.add(pp, x2, 0);
+					
+					e.setDropCompleted(true);
+					e.consume();
+				} else {
+					e.setDropCompleted(true);
+					e.consume();
+				}
+			} catch(Exception e1) { e1.printStackTrace(); };
+		});
+		
+		/*
+		 * 	Listener bottoni
+		 */
+		btnEndMove.setOnMouseClicked(e -> {
+			azione = Azione.FINE_MOSSA;
+			synchronized(lock) { lock.notify(); }
+		});
+		
+		btnSurrender.setOnMouseClicked(e -> {
+			azione = Azione.RESA;
+			synchronized(lock) { lock.notify(); }
+		});
+		
+		btnExchange.setOnMouseClicked(e -> {
+			azione = Azione.CAMBIO;
+			synchronized(lock) { lock.notify(); }
+		});
+		
 		System.out.println("Inzio partita...");
 		
 		// Thread gestore della partita
@@ -83,22 +230,26 @@ public class GameController implements Initializable {
 		// Aggiorna plancia e leggio
 		Platform.runLater(() -> {
 			// Plancia
-			for(PiecePane p : boardPieces)
+			for(PiecePane p : boardPieces) {
 				p.removeFromParent();
+				boardPieces.remove(p);
+			}
 			for(int x = 0; x < 15; x++)
 				for(int y = 0; y < 15; y++)
 					if(board[x][y] != '\0') {
-						PiecePane p = new PiecePane(board[x][y]);
+						PiecePane p = newPiece(board[x][y]);
 						gameBoard.add(p, x, y);
 						boardPieces.add(p);
 					}
 			
 			// Leggio
-			for(PiecePane p : rackPieces)
+			for(PiecePane p : rackPieces) {
 				p.removeFromParent();
+				rackPieces.remove(p);
+			}
 			for(int x = 0; x < 7; x++)
 				if(rack[x] != '\0') {
-					PiecePane p = new PiecePane(rack[x]);
+					PiecePane p = newPiece(rack[x]);
 					gameRack.add(p, x, 0);
 					rackPieces.add(p);
 				}
@@ -170,13 +321,69 @@ public class GameController implements Initializable {
 	 * 	Interfacciamento GUI
 	 */
 	
+	public PiecePane newPiece(char lettera) {
+		PiecePane p = new PiecePane(lettera);
+		
+		p.setOnDragDetected(e -> {
+			// Trova l'origine del tassello
+			//	'b' per la plancia
+			//	'r' per il leggio
+			char origin = (gameBoard.getChildren().contains(p) ? 'b' : 'r');
+			
+			// Calcola la posizione nella plancia
+			Position point;
+			
+			if(origin == 'b')
+				point = new Position(e, gameBoard);
+			else
+				point = new Position(e, gameRack);
+			
+			int xx = (int)Math.floor(point.x / 40);
+			int yy = (int)Math.floor(point.y / 40);
+			System.out.println("Drag started");
+			
+			// Se puo' essere spostato, inserirlo nella dragboard
+			if(origin == 'r' || (origin == 'b' && boardMove[xx][yy])) {
+				Dragboard db = p.startDragAndDrop(TransferMode.MOVE);
+				ClipboardContent content = new ClipboardContent();
+				content.putString(origin + ":" + xx + "," + yy);
+				db.setContent(content);
+				
+				// Imposta immagine drag
+				WritableImage snap = new WritableImage(40, 40);
+				SnapshotParameters prop = new SnapshotParameters();
+				p.snapshot(prop, snap);
+				db.setDragView(snap);
+				p.setVisible(false);
+			}
+			
+			e.consume();
+		});
+		
+		p.setOnDragDone(e -> {
+			System.out.println("Drag done");
+			
+			p.removeFromParent();
+			boardPieces.remove(p);
+			rackPieces.remove(p);
+			
+			e.consume();
+		});
+		
+		return p;
+	}
+	
 	public void addPoints(HashMap<String, Integer> points) {
-		String total = labelPoints.getText();
+		String all = wordList.getText();
+		int total = 0;
 		
-		for(String word : points.keySet())
-			total += "\n" + word + " - " + points.get(word) + " pt.";
+		for(String word : points.keySet()) {
+			all += "\n" + word + " - " + points.get(word) + " pt.";
+			total += points.get(word);
+		}
 		
-		labelPoints.setText(total);
+		wordList.setText(all);
+		labelPoints.setText("Punti: " + total);
 	}
 
 	public void alert(String message, AlertType type) {
