@@ -29,9 +29,12 @@ public class GameServer extends Thread {
 	/** Flag che indica se la partita e' ancora in corso */
 	boolean running;
 	
+	public int nTurniVuoti; // conteggio dei turni a vuoto
+	
 	public GameServer(Giocatore a, Giocatore b) {
 		playerOne = a;
 		playerTwo = b;
+		nTurniVuoti=0;
 		
 		running = true;
 	}
@@ -48,19 +51,15 @@ public class GameServer extends Thread {
 		// Loop gioco
 		try {
 			Giocatore current = playerOne;
-			int contTurni=0;
-			/*
+			
 			//conto quanti turni vengono fatti senza mettere parole sulla plancia
-			if(passa o cambia)
-				contTurni++;
-			else contTurni=0;
 			//condizioni per la fine della partita
-			if(bag.isEmpty() == true || contTurni > 2) {
-				// Invia messaggio fine a entrambi i giocatori
+			if(bag.isEmpty() == true || nTurniVuoti > 5) {	//manca la condizione sul tempo scaduto
+				// Invia messaggio fine a entrambi i giocatori con i punteggi e il vincitore
 				
 				// Chiudi le connessioni
 			}
-			*/
+			
 			while(running) {
 				loop(current);
 				
@@ -115,6 +114,7 @@ public class GameServer extends Thread {
 				break;
 				
 			case CAMBIO:
+				nTurniVuoti++; //conto i turni che vanno a vuoto
 				n = objin.readInt();
 				if(n == 7)
 					if(!p.cambioSecco)
@@ -133,8 +133,14 @@ public class GameServer extends Thread {
 				
 				objout.writeObject(rack);
 				objout.flush();
-					
+				break;
+			case FINE_MOSSA:
+				nTurniVuoti=0;	//si riazzerano i turni che vanno a vuoto
+				break;
 				
+			case PASSO:
+				nTurniVuoti++; 	//conto i turni che vanno a vuoto
+				break;
 			default:
 				//objout.writeObject("continue");
 				break;

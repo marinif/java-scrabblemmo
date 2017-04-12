@@ -15,7 +15,6 @@ public class Giocatore {
 		this.nome = nome;
 		this.socket = socket;
 		
-		
 	}
 	
 	public boolean disconnetti(String motivo) {
