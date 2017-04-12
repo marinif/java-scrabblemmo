@@ -1,24 +1,32 @@
 package game.client;
 
-import java.awt.Button;
+import javafx.scene.control.Button;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.ResourceBundle;
 
 import game.Scrabble;
 import game.Scrabble.Azione;
+import game.Scrabble.Colore;
 import game.client.gui.PiecePane;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
+import javafx.fxml.Initializable;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
+import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.Pane;
 import javafx.scene.layout.Priority;
 
-public class GameController {
+public class GameController implements Initializable {
+	
+	@FXML AnchorPane blockingPane;
 	
 	/* Plancia */
 	char[][] board = new char[15][15];
@@ -38,7 +46,35 @@ public class GameController {
 	/* Elenco parole */
 	@FXML Label labelPoints;
 	
-	public GameController() {
+	@Override
+	public void initialize(URL fxmlFileLocation, ResourceBundle resources) {
+		for(int x = 0; x < 15; x++)
+			for(int y = 0; y < 15; y++) {
+				Pane pane = new AnchorPane();
+				pane.setStyle(
+						"-fx-background-color: " + convertiColore(Scrabble.coloriCaselle[x][y]) + ";" +
+						"-fx-border-style: solid outside; -fx-border-width: 1; -fx-border-color: #222;"
+				);
+				
+				gameBoard.add(pane, x, y);
+				pane.applyCss();
+				pane.setOpacity(0.8);
+				
+				pane.setOnDragEntered(e -> {
+					pane.setOpacity(1.0);
+					e.consume();
+				});
+				
+				pane.setOnDragExited(e -> {
+					pane.setOpacity(0.8);
+					e.consume();
+				});
+				
+			}
+		
+		System.out.println("Inzio partita...");
+		
+		// Thread gestore della partita
 		GameClient client = new GameClient(MainApplication.serverSocket, this);
 		client.start();
 	}
@@ -68,6 +104,7 @@ public class GameController {
 				}
 			
 			// Abilita l'interazione con la scacchiera
+			blockingPane.setVisible(false);
 			gameBoard.setDisable(false);
 			gameRack.setDisable(false);
 		});
@@ -81,6 +118,7 @@ public class GameController {
 		Platform.runLater(() -> {
 			gameBoard.setDisable(true);
 			gameRack.setDisable(true);
+			blockingPane.setVisible(true);
 		});
 		
 		return null;
@@ -185,4 +223,20 @@ public class GameController {
 	}
 	
 
+	private static String convertiColore(Colore c) {
+		switch(c){
+		case ROSSO:
+			return "#d62b3c";
+		case ROSA:
+			return "#dba287";
+		case VERDE:
+			return "#068f6e";
+		case BIANCO:
+			return "#a5c7d2";
+		case BLU:
+			return "#1c7dd8";
+		default:
+			return "#000000";
+		}
+	}
 }
