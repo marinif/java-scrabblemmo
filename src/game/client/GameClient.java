@@ -29,8 +29,8 @@ public class GameClient extends Thread {
 		running = true;
 		
 		try {
-		while(running)
-			loop();
+			while(running)
+				loop();
 		} catch(IOException e) {
 			e.printStackTrace();
 		}
