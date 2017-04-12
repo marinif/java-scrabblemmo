@@ -72,6 +72,7 @@ public class MainApplication extends Application {
 					PrintStream out = new PrintStream(serverSocket.getOutputStream());
 					
 					String auth = null;
+					boolean authenticated = false;
 					
 					do {
 						Thread.sleep(100);
@@ -122,14 +123,18 @@ public class MainApplication extends Application {
 									d2.setContentText("Connesso, in attesa di giocatori...");
 									//TODO: modificando il d2 invece di aprire un altro alert, l'alert e' buggato
 								});
+								break;
+								
+							case "auth:fatto!":
+								authenticated = true;
+								break;
 							}
 						}
-					} while(auth != "auth:fatto!");
+					} while(!authenticated);
 					
-					Platform.runLater(() -> {
-						connected = true;
-						d2.close();
-					});
+					System.out.println("Partita iniziata");
+					connected = true;
+					
 				} catch(Exception e) {
 					Platform.runLater(() -> {
 						e.printStackTrace();
