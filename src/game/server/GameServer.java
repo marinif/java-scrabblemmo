@@ -40,6 +40,8 @@ public class GameServer extends Thread {
 	
 	@Override
 	public void run() {
+		// Come per regolamento, viene aggiunto un tassello iniziale
+		board[7][7] = bag.pesca();
 		try {
 			Giocatore current = playerOne;
 			while(running) {
