@@ -9,7 +9,7 @@ public class Parola {
 	public final int yi;
 	public final int xf;
 	public final int yf;
-	private int punteggio;
+	public final int punteggio;
 	public final String parola;
 	
 	static{
@@ -29,18 +29,19 @@ public class Parola {
 	    
 	}
 	
-	public Parola(int xi,int yi,int xf,int yf,Scrabble s){
+	public Parola(int xi,int yi,int xf,int yf,char[][] s){
 		this.xi=xi;
 		this.yi=yi;
 		this.xf=xf;
 		this.yf=yf;
 		String temporanea="";
+		int temporanea2 = 0;
 		//orizzontale
 		if(xi==xf){
 			int tmp=yi;
 			while(tmp<yf){	//scorrendo sui tasselli
-				this.punteggio += s.getTassello(xi,tmp).getPunteggio();	//si calcola il punteggio
-				temporanea += s.getTassello(xi,tmp).lettera; //e si concatenano le lettere per formare la parola
+				temporanea2 += Scrabble.getPunteggio(s[xi][tmp]);	//si calcola il punteggio
+				temporanea += Scrabble.getPunteggio(s[xi][tmp]); //e si concatenano le lettere per formare la parola
 				tmp++;
 			}
 		}
@@ -48,13 +49,14 @@ public class Parola {
 		else if(yi==yf){
 			int tmp=xi;
 			while(tmp<xf){ //scorrendo sui tasselli
-				punteggio += s.getTassello(tmp,yi).getPunteggio(); //si calcola il punteggio
-				temporanea += s.getTassello(tmp,yi).lettera; //e si concatenano le lettere per formare la parola
+				temporanea2 += Scrabble.getPunteggio(s[xi][tmp]); //si calcola il punteggio
+				temporanea += s[xi][tmp]; //e si concatenano le lettere per formare la parola
 				tmp++;
 			}
 		}
-		else punteggio = -1;
+		else temporanea2 = -1;
 		
+		punteggio=temporanea2;
 		parola=temporanea;
 	}
 	

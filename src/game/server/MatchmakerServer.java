@@ -1,6 +1,5 @@
 package game.server;
 
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.ServerSocket;
@@ -9,15 +8,13 @@ import java.net.SocketTimeoutException;
 import java.util.ArrayList;
 import java.util.Scanner;
 
-import game.GameServer;
-import game.Giocatore;
 import game.Scrabble;
 
 public abstract class MatchmakerServer {
 	public static final int DEFAULT_PORT = 4010;
 	public static final int MAX_PARTITE = 100;
 	
-	static ArrayList<Thread> partite;
+	static ArrayList<Thread> partite = new ArrayList<>();
 	public static boolean running;
 	
 	public static void main(String[] args) throws IOException {
@@ -44,6 +41,8 @@ public abstract class MatchmakerServer {
 		
 		// Attendi giocatori
 		running = true;
+		mm.start();
+		
 		while(running) {
 			try {
 				Socket s = server.accept();
@@ -52,14 +51,16 @@ public abstract class MatchmakerServer {
 			} catch(SocketTimeoutException e) {}
 		}
 		
+		server.close();
 	}
 	
 	private static class MatchmakingThread extends Thread {
 		private volatile ArrayList<Giocatore> players = new ArrayList<>();
 		
 		public void aggiungiConnessione(Socket s) throws IOException {
-			PrintWriter out = new PrintWriter(s.getOutputStream());
+			@SuppressWarnings("resource")
 			Scanner in = new Scanner(s.getInputStream());
+			PrintWriter out = new PrintWriter(s.getOutputStream());
 			
 			out.println("auth:versione?"); out.flush();
 			if(in.hasNextLine() && !in.nextLine().equals(Scrabble.VERSIONE_GIOCO)) {
@@ -83,10 +84,16 @@ public abstract class MatchmakerServer {
 			
 			// Attendi partita
 			out.println("auth:aspetta!"); out.flush();
-			players.add(new GiocatoreRemoto(nome, s));
+			players.add(new Giocatore(nome, s));
 			
 			System.out.println("Nuovo giocatore in attesa: " + nome);
 			
+			// Verifica se ci sono giocatori sconnessi
+			for(Giocatore g : players)
+				if(!g.socket.isConnected())
+					players.remove(g);
+			
+			// Notifica il thread di matchmaking
 			synchronized(this) { notify(); }
 		}
 		
@@ -95,13 +102,16 @@ public abstract class MatchmakerServer {
 			while(running)
 				try {
 					// Attendi nuove connessioni
-					this.wait();
+					synchronized(this) { this.wait(); }
 					
+					System.out.println("Thread risvegliato");
 					if(players.size() >= 2) {
+						System.out.println("Trovati due giocatori");
+						
 						final Giocatore a = players.remove(0);
 						final Giocatore b = players.remove(0);
 						
-						partite.add(new Thread() {
+						Thread partita = new Thread() {
 							@Override
 							public void run() {
 								// Notifica i due giocatori
@@ -109,10 +119,17 @@ public abstract class MatchmakerServer {
 								
 								// Inizia gioco
 								System.out.println("Inizia il gioco! " + a.nome + " VS " + b.nome);
-								//GameServer game = new GameServer(a, b);
-								//game.run();
+								
+								GameServer game = new GameServer(a, b);
+								game.start();
+								
+								System.out.println("Partita terminata");
+								partite.remove(this);
 							}
-						});
+						};
+						
+						partite.add(partita);
+						partita.start();
 					}
 				} catch (InterruptedException e) {
 					running = false;

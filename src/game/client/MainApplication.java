@@ -3,7 +3,6 @@ package game.client;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.net.Socket;
-import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.Scanner;
 
@@ -17,7 +16,6 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.*;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
-import javafx.scene.control.ButtonBar.ButtonData;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.TextInputDialog;
 import javafx.scene.image.ImageView;
@@ -28,7 +26,7 @@ public class MainApplication extends Application {
 	public static Stage primaryStage;
 	
 	boolean connected = false;
-	Socket serverSocket;
+	public static Socket serverSocket;
 	String motd = null;
 
 	public static void main(String[] args) {
@@ -60,7 +58,6 @@ public class MainApplication extends Application {
 		d2.getButtonTypes().setAll(btnCancel);
 		
 		// Thread di connessione
-		Socket server = null;
 		Thread gameThread = new Thread() {
 			
 			@Override
@@ -70,6 +67,7 @@ public class MainApplication extends Application {
 				try {
 					serverSocket = new Socket(host, port);
 					
+					@SuppressWarnings("resource")
 					Scanner in = new Scanner(serverSocket.getInputStream());
 					PrintStream out = new PrintStream(serverSocket.getOutputStream());
 					
@@ -118,7 +116,7 @@ public class MainApplication extends Application {
 								Platform.runLater(() -> {
 									//d2.close();
 									
-									Alert d5 = new Alert(AlertType.INFORMATION);
+									//Alert d5 = new Alert(AlertType.INFORMATION);
 									d2.setTitle("Scrabble MMO");
 									d2.setHeaderText(motd);
 									d2.setContentText("Connesso, in attesa di giocatori...");
@@ -132,8 +130,6 @@ public class MainApplication extends Application {
 						connected = true;
 						d2.close();
 					});
-					
-					
 				} catch(Exception e) {
 					Platform.runLater(() -> {
 						e.printStackTrace();
@@ -147,10 +143,12 @@ public class MainApplication extends Application {
 						d3.showAndWait();
 						System.exit(2);
 					});
+					
 				}
 				finally { 
 					// Chiudi alert di attesa
 					Platform.runLater(() -> { if(d2.isShowing()) d2.close(); });
+					
 				}
 			}
 		};
@@ -159,14 +157,21 @@ public class MainApplication extends Application {
 		d2.showAndWait();
 		
 		if(!connected) {
-			try { serverSocket.close(); }
-			catch(IOException e) { e.printStackTrace(); }
+			try {
+				if(serverSocket.isConnected())
+					serverSocket.close();
+				
+				Alert d6 = new Alert(AlertType.ERROR);
+				d6.setHeaderText("Errore di connessione");
+				d6.setContentText("Il server ha terminato la connessione");
+				d6.showAndWait();
+			} catch(IOException e) { e.printStackTrace(); }
 			finally { System.exit(0); }
 		}
 		
 		
 		// Inizializzazione dell'applicazione
-		this.primaryStage = stage;
+		primaryStage = stage;
 		stage.setTitle("Scrabble MMO"); 
 		stage.setMinWidth(1024);
 		stage.setMinHeight(740);
