@@ -90,30 +90,27 @@ public class Scrabble {
 	public static ArrayList<Parola> trovaParole(char[][] board){
 		//lista di tutte le parole della griglia
 				ArrayList<Parola> parole= new ArrayList<Parola>();
-				
-				for(int i=0;i<15;i++)
-					for(int j=0;j<15;j++){
-						if(board[i][j] != '\0'){ //se il tassello non è vuoto controllo se la parola c'era in precedenza
-							//appena si incontra una casella non vuota si scorre sia a destra che in basso per leggere la parola
-							//parola verticale
-							if(board[i+1][j] != '\0' && board[i-1][j] == '\0'){
-								int k = i;
-								while(board[k][j] != '\0')
-									k++;
-								Parola p=new Parola(i,j,k,j,board);
-								parole.add(p);
-							}
-							//parola orizzontale
-							if(board[i][j+1] != '\0' && board[i][j-1] == '\0'){
-								int k = j;
-								while(board[i][k] != '\0')
-									k++;
-								Parola p=new Parola(i,j,i,k,board);
-								parole.add(p);
-							}
-						}
-					}
-				return parole;
+				//orizzontale
+				for(int x=0;x<15;x++){
+					int k=-1;
+					for(int y=0;y<15;y++)
+						if(k == -1)
+							if(board[x][y] != '\0')
+								k=x;
+						else if(board[x][y] == '\0')
+							parole.add(new Parola(k,y,x,y,board));
+				}
+				//verticale
+				for(int y=0;y<15;y++){
+					int k=-1;
+					for(int x=0;x<15;x++)
+						if(k == -1)
+							if(board[x][y] != '\0')
+								k=y;
+						else if(board[x][y] == '\0')
+								parole.add(new Parola(x,k,x,y,board));
+				}
+			return parole;
 	}
 	
 	/** Verifica la correttezza delle parole 
