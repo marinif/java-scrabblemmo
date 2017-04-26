@@ -522,8 +522,13 @@ public class GameController implements Initializable {
 			total += points.get(word);
 		}
 		
-		wordList.setText(all);
-		labelPoints.setText("Punti: " + total);
+		final String all2 = all;
+		final int total2 = total;
+		
+		Platform.runLater(() -> {
+			wordList.setText(all2);
+			labelPoints.setText("Punti: " + total2);
+		});
 	}
 
 	public void alert(String message, AlertType type) {
