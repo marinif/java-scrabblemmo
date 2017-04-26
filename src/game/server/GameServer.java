@@ -174,7 +174,7 @@ public class GameServer extends Thread {
 				// Send points
 				HashMap<String, Integer> points = new HashMap<>();
 				for(Parola word : playerWords) {
-					points.put(word.toString(), word.punteggio);
+					points.put(word.parola, word.punteggio);
 					p.punteggio += word.punteggio;
 				}
 				
